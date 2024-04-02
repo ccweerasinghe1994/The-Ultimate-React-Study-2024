@@ -1,6 +1,6 @@
-# 1.PART_REACT_FUNDAMENTALS
+# 1.WEB_FUNDAMENTALS
 
-- [1.PART\_REACT\_FUNDAMENTALS](#1part_react_fundamentals)
+- [1.WEB\_FUNDAMENTALS](#1web_fundamentals)
   - [Introduction](#introduction)
   - [Before SPA(Single Page Application)](#before-spasingle-page-application)
   - [What is SPA(Single Page Application) ?](#what-is-spasingle-page-application-)
