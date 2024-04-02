@@ -167,11 +167,150 @@ some other useful extensions:
 ![alt text](image-21.png)
 ![alt text](image-22.png)
 ![alt text](image-23.png)
+![alt text](image-25.png)
+![alt text](image-26.png)
 
 ## 6. Pure React
 
+let's create a `index.html` file and add the following code:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body></body>
+</html>
+```
+
+go to react installation page <https://react.dev/learn/installation>
+![alt text](image-24.png)
+it will redirect you to the following page <https://gist.githubusercontent.com/gaearon/0275b1e1518599bbeafcde4722e79ed1/raw/db72dcbf3384ee1708c4a07d3be79860db04bff0/example.html>
+
+from there copy the following code:
+
+```html
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+```
+
+and paste it in the `body` tag of the `index.html` file
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  </body>
+</html>
+
+```
+
+let's create a clock using pure react
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script>
+      function App() {
+        const [time, setTime] = React.useState(new Date().toLocaleTimeString());
+
+        React.useEffect(() => {
+          setInterval(() => {
+            setTime(new Date().toLocaleTimeString());
+          }, 1000);
+        }, []);
+
+        return React.createElement("header", null, `Hello React it's ${time}`);
+      }
+
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(React.createElement(App));
+    </script>
+  </body>
+</html>
+```
+
+![alt text](image-27.png)
+
 ## 7. A Quick Look at React's Official Documentation
+
+<https://react.dev/>
 
 ## 8. Setting Up a New React Project The Options
 
+![alt text](image-28.png)
+
+react official documentation recommendations:
+
+<https://react.dev/learn/start-a-new-react-project>
+
+![alt text](image-29.png)
+
 ## 9. Setting Up a Project With Create-React-App
+
+we will use vite instead of create-react-app
+
+<https://vitejs.dev/>
+
+![alt text](image-30.png)
+
+go to your terminal and type the following command:
+
+```bash
+npm create vite@latest
+```
+
+![alt text](image-31.png)
+
+now cd into the project directory
+
+```bash
+cd sample-vite-project
+```
+
+and run the following command:
+
+```bash
+npm install
+```
+
+![alt text](image-32.png)
+
+to`start the development server` run the following command:
+
+```bash
+npm run dev
+```
+
+to `build the project` run the following command:
+
+```bash
+npm run build
+```
+
+to `preview the build` run the following command:
+
+```bash
+npm run serve
+```
