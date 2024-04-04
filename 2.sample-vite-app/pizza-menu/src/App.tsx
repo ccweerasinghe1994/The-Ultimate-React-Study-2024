@@ -70,21 +70,57 @@ function Pizza() {
   );
 }
 
+type THeaderProps = {};
+
+const Header = (props: Props) => {
+  return (
+    <nav className="flex items-center justify-between">
+      <ul className="flex gap-5">
+        <li>
+          <h1>Fast React Pizza Company</h1>
+        </li>
+        <li>Items 1</li>
+        <li>Item 2</li>
+      </ul>
+      <ModeToggle />
+    </nav>
+  );
+};
+
+type TMenuProps = {};
+
+const Menu = (props: Props) => {
+  return (
+    <>
+      <h2>Our Menu</h2>
+      <Pizza />
+    </>
+  );
+};
+
+type FooterProps = {};
+
+const Footer = (props: Props) => {
+  const hours = new Date().getHours();
+
+  const openHour = 12;
+  const closeHour = 22;
+  console.log(hours);
+
+  const isOpen = hours >= openHour || hours <= closeHour;
+  console.log("🚀 ~ Footer ~ isOpen:", isOpen);
+
+  return (
+    <footer>{new Date().toLocaleTimeString()}we are currently open</footer>
+  );
+};
+
 function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <nav className="flex items-center justify-between">
-        <ul className="flex gap-5">
-          <li>Items 1</li>
-          <li>Item 2</li>
-        </ul>
-        <ModeToggle />
-      </nav>
-
-      <Pizza />
-      <Pizza />
-      <Pizza />
-      <Pizza />
+      <Header />
+      <Menu />
+      <Footer />
 
       {/* <LoginForm /> */}
     </ThemeProvider>
