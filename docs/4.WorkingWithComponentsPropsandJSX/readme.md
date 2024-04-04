@@ -157,7 +157,9 @@ export default App;
 ![img.png](img.png)
 
 ## 6. What is JSX
-
+![img_1.png](img_1.png)
+![img_2.png](img_2.png)
+![img_3.png](img_3.png)
 ## 7. Creating More Components
 
 ## 8. JavaScript Logic in Components
