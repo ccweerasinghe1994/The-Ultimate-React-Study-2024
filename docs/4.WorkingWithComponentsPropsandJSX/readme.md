@@ -722,11 +722,64 @@ root.render(
 ![img_13.png](img_13.png)
 
 ## 14. The Rules of JSX
-
+![img_14.png](img_14.png)
 ## 15. Rendering Lists
+```tsx
+const Menu = (props: Props) => {
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <h2 className="text-2xl dark:border-secondary uppercase py-3 border-t-2 inline-block border-black border-b-2 tracking-wider font-medium">
+        Our Menu
+      </h2>
+      <div className="grid grid-cols-2 gap-12 list-none">
+        {pizzaData.map((pizza) => (
+          <Pizza
+            photoName={pizza.photoName}
+            ingredients={pizza.ingredients}
+            name={pizza.name}
+            price={pizza.price}
+            soldOut
+            key={pizza.name}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+```
+
+![img_15.png](img_15.png)
 
 ## 16. Conditional Rendering With &&
+```tsx
+type TMenuProps = {};
 
+const Menu = (props: Props) => {
+  const pizzas = [];
+  const numberOfPizzas = pizzas?.length;
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <h2 className="text-2xl dark:border-secondary uppercase py-3 border-t-2 inline-block border-black border-b-2 tracking-wider font-medium">
+        Our Menu
+      </h2>
+      <div className="grid grid-cols-2 gap-12 list-none">
+        {numberOfPizzas > 0 &&
+          pizzaData.map((pizza) => (
+            <Pizza
+              photoName={pizza.photoName}
+              ingredients={pizza.ingredients}
+              name={pizza.name}
+              price={pizza.price}
+              soldOut
+              key={pizza.name}
+            />
+          ))}
+      </div>
+    </div>
+  );
+};
+```
+![img_16.png](img_16.png)
 ## 17. Conditional Rendering With Ternaries
 
 ## 18. Conditional Rendering With Multiple Returns

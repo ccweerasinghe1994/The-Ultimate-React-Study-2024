@@ -3,6 +3,7 @@ import { ThemeProvider } from "./components/theme-provider";
 import imageUrl from "./assets/pizzas/test.jpg";
 import { AspectRatio } from "./components/ui/aspect-ratio";
 import { FC } from "react";
+import { Button } from "./components/ui/button";
 
 interface IPizza {
   name: string;
@@ -55,9 +56,8 @@ const pizzaData: IPizza[] = [
     soldOut: false,
   },
 ];
-type THeaderProps = {};
 
-const Header = (props: Props) => {
+const Header = () => {
   return (
     <div>
       <nav className="flex items-center justify-between">
@@ -76,14 +76,15 @@ const Header = (props: Props) => {
   );
 };
 
-const Pizza: FC<IPizza> = ({ ingredients, name, photoName, price }) => {
-  // .pizza {
-  //   display: flex;
-  //   gap: 3.2rem;
-  // }
-
+const Pizza: FC<IPizza> = ({
+  ingredients,
+  name,
+  photoName,
+  price,
+  soldOut,
+}) => {
   return (
-    <div className="flex gap-8">
+    <div className={`flex gap-8 ${soldOut && ""}`}>
       <img
         src={photoName}
         alt="image of a pizza"
@@ -98,51 +99,56 @@ const Pizza: FC<IPizza> = ({ ingredients, name, photoName, price }) => {
   );
 };
 
-type TMenuProps = {};
-
-const Menu = (props: Props) => {
+const Menu = () => {
+  const pizzas = pizzaData;
+  const numberOfPizzas = pizzas?.length;
   return (
     <div className="flex flex-col items-center gap-4">
       <h2 className="text-2xl dark:border-secondary uppercase py-3 border-t-2 inline-block border-black border-b-2 tracking-wider font-medium">
         Our Menu
       </h2>
       <div className="grid grid-cols-2 gap-12 list-none">
-        <Pizza
-          photoName="/src/assets/pizzas/prosciutto.jpg"
-          ingredients="Tomato, mozarella, ham, aragula, and burrata cheese"
-          name="Pizza Prosciutto"
-          price={18}
-          soldOut
-          key={"Pizza Prosciutto"}
-        />
-        <Pizza
-          photoName="/src/assets/pizzas/prosciutto.jpg"
-          ingredients="Tomato, mozarella, ham, aragula, and burrata cheese"
-          name="Pizza Prosciutto"
-          price={18}
-          soldOut
-          key={"Pizza Prosciutto"}
-        />
+        {numberOfPizzas > 0 ? (
+          pizzaData.map((pizza) => (
+            <Pizza
+              photoName={pizza.photoName}
+              ingredients={pizza.ingredients}
+              name={pizza.name}
+              price={pizza.price}
+              soldOut
+              key={pizza.name}
+            />
+          ))
+        ) : (
+          <p className="col-span-2 ">
+            we are still working on our menu. Please comeback later
+          </p>
+        )}
       </div>
     </div>
   );
 };
 
-type FooterProps = {};
-
-const Footer = (props: Props) => {
+const Footer = () => {
   const hours = new Date().getHours();
 
   const openHour = 12;
   const closeHour = 22;
-  console.log(hours);
 
-  const isOpen = hours >= openHour || hours <= closeHour;
-  console.log("🚀 ~ Footer ~ isOpen:", isOpen);
+  const isOpen = hours >= openHour && hours <= closeHour;
 
   return (
-    <footer className="text-sm text-center">
-      {new Date().toLocaleTimeString()}we are currently open
+    <footer className="text-sm text-center mb-20">
+      {isOpen ? (
+        <div className="flex flex-col items-center gap-6">
+          <p>we are open unit {closeHour}:00. Come Visit us or order In</p>
+          <Button>Order</Button>
+        </div>
+      ) : (
+        <p>
+          we are happy to well come you between {openHour}:00 to {closeHour}:00
+        </p>
+      )}
     </footer>
   );
 };
