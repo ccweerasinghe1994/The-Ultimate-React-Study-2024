@@ -307,9 +307,155 @@ const Footer = (props: Props) => {
 };
 ```
 ## 9. Separation of Concerns
+![img_5.png](img_5.png)
+![img_6.png](img_6.png)
+![img_7.png](img_7.png)
 
+Separation of Concerns (SoC) is a design principle for separating a program into distinct sections, where each section addresses a separate concern. In the context of React, it means organizing your code in a way that each component or module has a specific job or concern.
+
+For example, in a typical React application, you might have components for the header, footer, and main content of your application. Each of these components has a specific job:
+
+- The header component might contain navigation and branding.
+- The main content component might contain the main interactive parts of the application.
+- The footer component might contain copyright information and links.
+
+Each of these components is responsible for a specific part of the application and doesn't need to know about the others. This makes the code easier to understand, test, and maintain.
+
+Here's an example of how you might structure these components in a React application:
+
+```jsx
+function Header() {
+  return (
+    <header>
+      {/* Navigation and branding */}
+    </header>
+  );
+}
+
+function MainContent() {
+  return (
+    <main>
+      {/* Main interactive parts of the application */}
+    </main>
+  );
+}
+
+function Footer() {
+  return (
+    <footer>
+      {/* Copyright information and links */}
+    </footer>
+  );
+}
+
+function App() {
+  return (
+    <div>
+      <Header />
+      <MainContent />
+      <Footer />
+    </div>
+  );
+}
+
+export default App;
+```
+
+In this example, each component has a specific concern and doesn't need to know about the others. This is the essence of Separation of Concerns in React.
 ## 10. Styling React Applications
+```tsx
+function Pizza() {
+  // .pizza {
+  //   display: flex;
+  //   gap: 3.2rem;
+  // }
 
+  return (
+    <div className="flex flex-col gap-2 py-2">
+      <img
+        src={imageUrl}
+        alt="image of a pizza"
+        className="w-32 aspect-square self-start"
+      />
+      <h3 className="text-xl font-normal">Pizza Spinichi</h3>
+      <p className="text-sm font-light italic mb-auto">
+        Tomato, mozarella, spinach, and ricotta cheese
+      </p>
+    </div>
+  );
+}
+
+type THeaderProps = {};
+
+const Header = (props: Props) => {
+  return (
+    <div>
+      <nav className="flex items-center justify-between">
+        <ul className="flex gap-5">
+          <li>Items 1</li>
+          <li>Item 2</li>
+        </ul>
+        <ModeToggle />
+      </nav>
+      <header className="self-stretch mt-10">
+        <h1 className="text-[#edc84b] uppercase text-5xl text-center font-light relative block w-full before:block before:content-[''] before:h-[3px] before:w-[4rem] before:bg-[#edc84b] before:absolute before:top-11 before:-left-14 after:block after:content-[''] after:h-[3px] after:w-[4rem] after:bg-[#edc84b] after:absolute after:top-11 after:-right-12">
+          Fast React Pizza Company
+        </h1>
+      </header>
+    </div>
+  );
+};
+
+type TMenuProps = {};
+
+const Menu = (props: Props) => {
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <h2 className="text-2xl uppercase py-3 border-t-2 inline-block border-black border-b-2 tracking-wider font-medium">
+        Our Menu
+      </h2>
+      <div className="grid grid-cols-2 gap-12 list-none">
+        <Pizza />
+      </div>
+    </div>
+  );
+};
+
+type FooterProps = {};
+
+const Footer = (props: Props) => {
+  const hours = new Date().getHours();
+
+  const openHour = 12;
+  const closeHour = 22;
+  console.log(hours);
+
+  const isOpen = hours >= openHour || hours <= closeHour;
+  console.log("🚀 ~ Footer ~ isOpen:", isOpen);
+
+  return (
+    <footer className="text-sm text-center">
+      {new Date().toLocaleTimeString()}we are currently open
+    </footer>
+  );
+};
+
+function App() {
+  return (
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <div className="container flex flex-col items-center gap-12">
+        <Header />
+        <Menu />
+        <Footer />
+        {/* <LoginForm /> */}
+      </div>
+    </ThemeProvider>
+  );
+}
+
+export default App;
+
+```
 ## 11. Passing and Receiving Props
 
 ## 12. Props, Immutability, and One-Way Data Flow
