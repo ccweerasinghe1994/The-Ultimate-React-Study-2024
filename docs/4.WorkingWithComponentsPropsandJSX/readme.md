@@ -503,8 +503,223 @@ function App() {
 
 ```
 ## 12. Props, Immutability, and One-Way Data Flow
-
+![img_8.png](img_8.png)
+![img_9.png](img_9.png)
+![img_10.png](img_10.png)
+![img_11.png](img_11.png)
+![img_12.png](img_12.png)
 ## 13. CHALLENGE #1 Profile Card (v1)
+```jsx
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import "./styles.css";
+
+function App() {
+    return (
+        <div className="card">
+            <Avatar />
+            <div className="data">
+                <Intro />
+                {/* Should contain one Skill component
+        for each web dev skill that you have,
+        customized with props */}
+                <SkillList />
+            </div>
+        </div>
+    );
+}
+
+const rootElement = document.getElementById("root");
+const root = createRoot(rootElement);
+
+root.render(
+    <StrictMode>
+        <App />
+    </StrictMode>
+);
+
+```
+
+```css
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&display=swap");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "IBM Plex Mono", sans-serif;
+  background-color: #f7f7f7;
+}
+
+h1 {
+  margin-bottom: 12px;
+}
+
+.card {
+  width: 450px;
+  margin: 40px;
+  border: 4px solid #222;
+}
+
+.card::after {
+  content: "";
+  display: block;
+}
+
+.avatar {
+  width: 100%;
+  display: block;
+}
+
+.data {
+  padding: 32px;
+  padding-top: 24px;
+}
+
+.skill-list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.skill {
+  padding: 2px 12px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+```
+
+
+`Answer`
+```css
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&display=swap");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "IBM Plex Mono", sans-serif;
+  background-color: #f7f7f7;
+}
+
+h1 {
+  margin-bottom: 12px;
+}
+
+.card {
+  width: 450px;
+  margin: 40px;
+  border: 4px solid #222;
+}
+
+.card::after {
+  content: "";
+  display: block;
+}
+
+.avatar {
+  width: 100%;
+  display: block;
+}
+
+.avatar .img {
+  width: 100%;
+}
+
+.data {
+  padding: 32px;
+  padding-top: 24px;
+}
+
+.skill-list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.skill {
+  padding: 2px 12px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+```
+
+```tsx
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import "./styles.css";
+
+const Avatar = () => {
+  return (
+    <div className="avatar">
+      <img
+        className="img"
+        src="https://images.unsplash.com/photo-1529665253569-6d01c0eaf7b6?q=80&w=1985&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+      />
+    </div>
+  );
+};
+const Intro = () => {
+  return (
+    <div>
+      Hello i am a full stack developer. i enjoy learning new technologies
+    </div>
+  );
+};
+
+const SkillList = () => {
+  return (
+    <div className="skill-list">
+      <div className="skill">HTML CSS</div>
+      <div className="skill">HTML CSS</div>
+      <div className="skill">HTML CSS</div>
+    </div>
+  );
+};
+
+function App() {
+  return (
+    <div className="card">
+      <Avatar />
+      <div className="data">
+        <h1>Chamara Weerasinghe</h1>
+        <Intro />
+        <SkillList />
+      </div>
+    </div>
+  );
+}
+
+const rootElement = document.getElementById("root");
+const root = createRoot(rootElement);
+
+root.render(
+  <StrictMode>
+    <App />
+  </StrictMode>
+);
+
+```
+
+![img_13.png](img_13.png)
 
 ## 14. The Rules of JSX
 
