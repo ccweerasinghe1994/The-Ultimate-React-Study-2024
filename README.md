@@ -39,7 +39,7 @@
 
 `(🦺⛔ not added) below sections`
 
-## 5. Working With Components, Props, and JSX
+## [5. Working With Components, Props, and JSX](./docs/4.WorkingWithComponentsPropsandJSX/readme.md)
 
 ## 6. State, Events, and Forms Interactive Components
 
