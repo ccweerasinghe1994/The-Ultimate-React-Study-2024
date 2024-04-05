@@ -2,6 +2,7 @@ import { ModeToggle } from "./components/mode-toggle";
 import { ThemeProvider } from "./components/theme-provider";
 import imageUrl from "./assets/pizzas/test.jpg";
 import { AspectRatio } from "./components/ui/aspect-ratio";
+import { FC } from "react";
 
 interface IPizza {
   name: string;
@@ -15,67 +16,45 @@ const pizzaData: IPizza[] = [
     name: "Focaccia",
     ingredients: "Bread with italian olive oil and rosemary",
     price: 6,
-    photoName: "./pizzas/focaccia.jpg",
+    photoName: "/src/assets/pizzas/focaccia.jpg",
     soldOut: false,
   },
   {
     name: "Pizza Margherita",
     ingredients: "Tomato and mozarella",
     price: 10,
-    photoName: "./pizzas/margherita.jpg",
+    photoName: "/src/assets/pizzas/margherita.jpg",
     soldOut: false,
   },
   {
     name: "Pizza Spinaci",
     ingredients: "Tomato, mozarella, spinach, and ricotta cheese",
     price: 12,
-    photoName: "./pizzas/spinaci.jpg",
+    photoName: "/src/assets/pizzas/spinaci.jpg",
     soldOut: false,
   },
   {
     name: "Pizza Funghi",
     ingredients: "Tomato, mozarella, mushrooms, and onion",
     price: 12,
-    photoName: "./pizzas/funghi.jpg",
+    photoName: "/src/assets/pizzas/funghi.jpg",
     soldOut: false,
   },
   {
     name: "Pizza Salamino",
     ingredients: "Tomato, mozarella, and pepperoni",
     price: 15,
-    photoName: "./pizzas/salamino.jpg",
+    photoName: "/src/assets/pizzas/salamino.jpg",
     soldOut: true,
   },
   {
     name: "Pizza Prosciutto",
     ingredients: "Tomato, mozarella, ham, aragula, and burrata cheese",
     price: 18,
-    photoName: "./pizzas/prosciutto.jpg",
+    photoName: "/src/assets/pizzas/prosciutto.jpg",
     soldOut: false,
   },
 ];
-
-function Pizza() {
-  // .pizza {
-  //   display: flex;
-  //   gap: 3.2rem;
-  // }
-
-  return (
-    <div className="flex flex-col gap-2 py-2">
-      <img
-        src={imageUrl}
-        alt="image of a pizza"
-        className="w-32 aspect-square self-start"
-      />
-      <h3 className="text-xl font-normal">Pizza Spinichi</h3>
-      <p className="text-sm font-light italic mb-auto">
-        Tomato, mozarella, spinach, and ricotta cheese
-      </p>
-    </div>
-  );
-}
-
 type THeaderProps = {};
 
 const Header = (props: Props) => {
@@ -97,16 +76,53 @@ const Header = (props: Props) => {
   );
 };
 
+const Pizza: FC<IPizza> = ({ ingredients, name, photoName, price }) => {
+  // .pizza {
+  //   display: flex;
+  //   gap: 3.2rem;
+  // }
+
+  return (
+    <div className="flex gap-8">
+      <img
+        src={photoName}
+        alt="image of a pizza"
+        className="w-32 aspect-square self-start"
+      />
+      <div className="flex flex-col gap-2 py-2">
+        <h3 className="text-xl font-normal">{name}</h3>
+        <p className="text-sm font-light italic mb-auto">{ingredients}</p>
+        <span>{price}</span>
+      </div>
+    </div>
+  );
+};
+
 type TMenuProps = {};
 
 const Menu = (props: Props) => {
   return (
     <div className="flex flex-col items-center gap-4">
-      <h2 className="text-2xl uppercase py-3 border-t-2 inline-block border-black border-b-2 tracking-wider font-medium">
+      <h2 className="text-2xl dark:border-secondary uppercase py-3 border-t-2 inline-block border-black border-b-2 tracking-wider font-medium">
         Our Menu
       </h2>
       <div className="grid grid-cols-2 gap-12 list-none">
-        <Pizza />
+        <Pizza
+          photoName="/src/assets/pizzas/prosciutto.jpg"
+          ingredients="Tomato, mozarella, ham, aragula, and burrata cheese"
+          name="Pizza Prosciutto"
+          price={18}
+          soldOut
+          key={"Pizza Prosciutto"}
+        />
+        <Pizza
+          photoName="/src/assets/pizzas/prosciutto.jpg"
+          ingredients="Tomato, mozarella, ham, aragula, and burrata cheese"
+          name="Pizza Prosciutto"
+          price={18}
+          soldOut
+          key={"Pizza Prosciutto"}
+        />
       </div>
     </div>
   );

@@ -457,7 +457,51 @@ export default App;
 
 ```
 ## 11. Passing and Receiving Props
+```tsx
+type TMenuProps = {};
 
+const Menu = (props: Props) => {
+    return (
+        <div className="flex flex-col items-center gap-4">
+            <h2 className="text-2xl uppercase py-3 border-t-2 inline-block border-black border-b-2 tracking-wider font-medium">
+                Our Menu
+            </h2>
+            <div className="grid grid-cols-2 gap-12 list-none">
+                <Pizza
+                    photoName="/src/assets/pizzas/prosciutto.jpg"
+                    ingredients="Tomato, mozarella, ham, aragula, and burrata cheese"
+                    name="Pizza Prosciutto"
+                    price={18}
+                    soldOut
+                    key={"Pizza Prosciutto"}
+                />
+                <Pizza
+                    photoName="/src/assets/pizzas/prosciutto.jpg"
+                    ingredients="Tomato, mozarella, ham, aragula, and burrata cheese"
+                    name="Pizza Prosciutto"
+                    price={18}
+                    soldOut
+                    key={"Pizza Prosciutto"}
+                />
+            </div>
+        </div>
+    );
+};
+
+function App() {
+  return (
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <div className="container flex flex-col items-center gap-12">
+        <Header />
+        <Menu />
+        <Footer />
+        {/* <LoginForm /> */}
+      </div>
+    </ThemeProvider>
+  );
+}
+
+```
 ## 12. Props, Immutability, and One-Way Data Flow
 
 ## 13. CHALLENGE #1 Profile Card (v1)
