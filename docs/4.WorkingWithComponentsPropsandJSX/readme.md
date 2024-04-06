@@ -781,7 +781,66 @@ const Menu = (props: Props) => {
 ```
 ![img_16.png](img_16.png)
 ## 17. Conditional Rendering With Ternaries
+```tsx
+const Menu = () => {
+  const pizzas = pizzaData;
+  const numberOfPizzas = pizzas?.length;
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <h2 className="text-2xl dark:border-secondary uppercase py-3 border-t-2 inline-block border-black border-b-2 tracking-wider font-medium">
+        Our Menu
+      </h2>
+      <div className="grid grid-cols-2 gap-12 list-none">
+        {numberOfPizzas > 0 ? (
+          pizzaData.map((pizza) => (
+            <Pizza
+              photoName={pizza.photoName}
+              ingredients={pizza.ingredients}
+              name={pizza.name}
+              price={pizza.price}
+              soldOut
+              key={pizza.name}
+            />
+          ))
+        ) : (
+          <p className="col-span-2 ">
+            we are still working on our menu. Please comeback later
+          </p>
+        )}
+      </div>
+    </div>
+  );
+};
 
+```
+
+```tsx
+const Footer = () => {
+  const hours = new Date().getHours();
+
+  const openHour = 12;
+  const closeHour = 22;
+
+  const isOpen = hours >= openHour && hours <= closeHour;
+
+  return (
+    <footer className="text-sm text-center mb-20">
+      {isOpen ? (
+        <div className="flex flex-col items-center gap-6">
+          <p>we are open unit {closeHour}:00. Come Visit us or order In</p>
+          <Button>Order</Button>
+        </div>
+      ) : (
+        <p>
+          we are happy to well come you between {openHour}:00 to {closeHour}:00
+        </p>
+      )}
+    </footer>
+  );
+};
+```
+
+![img_17.png](img_17.png)
 ## 18. Conditional Rendering With Multiple Returns
 
 ## 19. Extracting JSX Into a New Component
