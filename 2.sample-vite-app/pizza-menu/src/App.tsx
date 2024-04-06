@@ -137,6 +137,14 @@ const Footer = () => {
 
   const isOpen = hours >= openHour && hours <= closeHour;
 
+  if (isOpen) {
+    return (
+      <p>
+        we are happy to well come you between {openHour}:00 to {closeHour}:00
+      </p>
+    );
+  }
+
   return (
     <footer className="text-sm text-center mb-20">
       {isOpen ? (

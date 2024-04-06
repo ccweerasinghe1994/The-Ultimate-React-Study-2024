@@ -842,7 +842,39 @@ const Footer = () => {
 
 ![img_17.png](img_17.png)
 ## 18. Conditional Rendering With Multiple Returns
+```tsx
+const Footer = () => {
+  const hours = new Date().getHours();
 
+  const openHour = 12;
+  const closeHour = 22;
+
+  const isOpen = hours >= openHour && hours <= closeHour;
+
+  if (isOpen) {
+    return (
+      <p>
+        we are happy to well come you between {openHour}:00 to {closeHour}:00
+      </p>
+    );
+  }
+
+  return (
+    <footer className="text-sm text-center mb-20">
+      {isOpen ? (
+        <div className="flex flex-col items-center gap-6">
+          <p>we are open unit {closeHour}:00. Come Visit us or order In</p>
+          <Button>Order</Button>
+        </div>
+      ) : (
+        <p>
+          we are happy to well come you between {openHour}:00 to {closeHour}:00
+        </p>
+      )}
+    </footer>
+  );
+};
+```
 ## 19. Extracting JSX Into a New Component
 
 ## 20. Destructuring Props
