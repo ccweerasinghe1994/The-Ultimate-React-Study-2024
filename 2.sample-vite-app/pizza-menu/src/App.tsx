@@ -1,6 +1,7 @@
 import Footer from "./components/Footer";
 import Header from "./components/Header";
 import Menu from "./components/Menu";
+import NvaBar from "./components/NvaBar";
 import { IPizza } from "./components/Pizza";
 import { ThemeProvider } from "./components/theme-provider";
 
@@ -53,6 +54,7 @@ function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <div className="container flex flex-col items-center gap-12">
+        <NvaBar />
         <Header />
         <Menu pizzaList={pizzaData} />
         <Footer />

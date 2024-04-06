@@ -15,16 +15,18 @@ const Pizza: FC<IPizza> = ({
   soldOut,
 }) => {
   return (
-    <div className={`flex gap-8 ${soldOut && ""}`}>
+    <div className="flex gap-8">
       <img
         src={photoName}
         alt="image of a pizza"
-        className="w-32 aspect-square self-start"
+        className={`w-32 aspect-square self-start ${
+          soldOut && "opacity-80 grayscale"
+        }`}
       />
-      <div className="flex flex-col gap-2 py-2">
+      <div className={`flex flex-col gap-2 py-2 ${soldOut && "text-[#888]"}`}>
         <h3 className="text-xl font-normal">{name}</h3>
         <p className="text-sm font-light italic mb-auto">{ingredients}</p>
-        <span>{price}</span>
+        <span>{soldOut ? "SOLD OUT" : price}</span>
       </div>
     </div>
   );

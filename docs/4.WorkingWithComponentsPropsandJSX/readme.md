@@ -1013,11 +1013,341 @@ export default Footer;
 
 ```
 ## 20. Destructuring Props
+```tsx
+import { FC } from "react";
 
+export interface IPizza {
+  name: string;
+  ingredients: string;
+  price: number;
+  photoName: string;
+  soldOut: boolean;
+}
+const Pizza: FC<IPizza> = ({
+  ingredients,
+  name,
+  photoName,
+  price,
+  soldOut,
+}) => {
+  return (
+    <div className={`flex gap-8 ${soldOut && ""}`}>
+      <img
+        src={photoName}
+        alt="image of a pizza"
+        className="w-32 aspect-square self-start"
+      />
+      <div className="flex flex-col gap-2 py-2">
+        <h3 className="text-xl font-normal">{name}</h3>
+        <p className="text-sm font-light italic mb-auto">{ingredients}</p>
+        <span>{price}</span>
+      </div>
+    </div>
+  );
+};
+
+export default Pizza;
+
+```
+
+Destructuring props in React is a JavaScript feature that allows you to extract properties from an object or items from an array quickly and straightforwardly. This is particularly useful in React because it allows you to extract the props you need in a component.
+
+Here's an example of how you can destructure props in a React component:
+
+```jsx
+import React from 'react';
+
+const MyComponent = ({ name, age }) => {
+  return (
+    <div>
+      <p>Name: {name}</p>
+      <p>Age: {age}</p>
+    </div>
+  );
+};
+
+export default MyComponent;
+```
+
+In the above example, `name` and `age` are destructured from the `props` object. This means you can use `name` and `age` directly, instead of having to use `props.name` and `props.age`.
 ## 21. React Fragments
+React Fragments are a common pattern in React for a component to return multiple elements. Fragments let you group a list of children without adding extra nodes to the DOM.
 
+Here's an example of how you can use React Fragments:
+
+```jsx
+import React from 'react';
+
+function MyComponent() {
+  return (
+    <React.Fragment>
+      <div>Child A</div>
+      <div>Child B</div>
+    </React.Fragment>
+  );
+}
+
+export default MyComponent;
+```
+
+In this example, `MyComponent` returns two `div` elements wrapped in a `React.Fragment`. This means that the two `div` elements will be siblings in the resulting DOM, even though they're returned from the same component function.
+
+You can also use the short syntax for React Fragments, which is just empty angle brackets:
+
+```jsx
+import React from 'react';
+
+function MyComponent() {
+  return (
+    <>
+      <div>Child A</div>
+      <div>Child B</div>
+    </>
+  );
+}
+
+export default MyComponent;
+```
+
+In this example, the `<>` and `</>` tags are a shorter syntax for `<React.Fragment>` and `</React.Fragment>`, respectively.
 ## 22. Setting Classes and Text Conditionally
+```tsx
+import { FC } from "react";
 
+export interface IPizza {
+  name: string;
+  ingredients: string;
+  price: number;
+  photoName: string;
+  soldOut: boolean;
+}
+const Pizza: FC<IPizza> = ({
+  ingredients,
+  name,
+  photoName,
+  price,
+  soldOut,
+}) => {
+  console.log("🚀 ~ soldOut:", soldOut);
+  return (
+    <div className="flex gap-8">
+      <img
+        src={photoName}
+        alt="image of a pizza"
+        className={`w-32 aspect-square self-start ${
+          soldOut && "opacity-80 grayscale"
+        }`}
+      />
+      <div className={`flex flex-col gap-2 py-2 ${soldOut && "text-[#888]"}`}>
+        <h3 className="text-xl font-normal">{name}</h3>
+        <p className="text-sm font-light italic mb-auto">{ingredients}</p>
+        <span>{soldOut ? "SOLD OUT" : price}</span>
+      </div>
+    </div>
+  );
+};
+
+export default Pizza;
+
+```
+![img_18.png](img_18.png)
 ## 23. Section Summary
-
+![img_19.png](img_19.png)
 ## 24. CHALLENGE #2 Profile Card (v2)
+```tsx
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import "./styles.css";
+
+const skills = [
+  {
+    skill: "HTML+CSS",
+    level: "advanced",
+    color: "#2662EA"
+  },
+  {
+    skill: "JavaScript",
+    level: "advanced",
+    color: "#EFD81D"
+  },
+  {
+    skill: "Web Design",
+    level: "advanced",
+    color: "#C3DCAF"
+  },
+  {
+    skill: "Git and GitHub",
+    level: "intermediate",
+    color: "#E84F33"
+  },
+  {
+    skill: "React",
+    level: "advanced",
+    color: "#60DAFB"
+  },
+  {
+    skill: "Svelte",
+    level: "beginner",
+    color: "#FF3B00"
+  }
+];
+
+function App() {
+  return (
+    <div className="card">
+      <Avatar />
+      <div className="data">
+        <Intro />
+        {/* Should contain one Skill component
+        for each web dev skill that you have,
+        customized with props */}
+        <SkillList />
+      </div>
+    </div>
+  );
+}
+
+function Avatar() {
+  return <img className="avatar" src="https://images.unsplash.com/photo-1712242467502-678b72cc8b5b?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3Dg" alt="Jonas Schmedtmann" />;
+}
+
+function Intro() {
+  return (
+    <div>
+      <h1>Jonas Schmedtmann</h1>
+      <p>
+        Full-stack web developer and teacher at Udemy. When not coding or
+        preparing a course, I like to play board games, to cook (and eat), or to
+        just enjoy the Portuguese sun at the beach.
+      </p>
+    </div>
+  );
+}
+
+function SkillList() {
+  return (
+    <div className="skill-list">
+      <Skill skill={skills[0].skill} color={skills[0].color} level={skills[0].level} />
+      <Skill skill={skills[1].skill} color={skills[1].color} level={skills[1].level} />
+      <Skill skill={skills[2].skill} color={skills[2].color} level={skills[2].level} />
+      <Skill skill={skills[3].skill} color={skills[3].color} level={skills[3].level} />
+      <Skill skill={skills[4].skill} color={skills[4].color} level={skills[4].level} />
+      <Skill skill={skills[5].skill} color={skills[5].color} level={skills[5].level} />
+    </div>
+  );
+}
+
+function Skill({ skill, color, level }) {
+  return (
+    <div className="skill" style={{ backgroundColor: color }}>
+      <span>{skill}</span>
+      <span>
+      {/* add your answer here */}
+      {/*    👶 -> beginner */}
+      {/*    👍 -> intermediate*/}
+      {/*    💪 -> advanced */}
+      </span>
+    </div>
+  );
+}
+
+const rootElement = document.getElementById("root");
+const root = createRoot(rootElement);
+
+root.render(
+  <StrictMode>
+    <App />
+  </StrictMode>
+);
+```
+```css
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&display=swap");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "IBM Plex Mono", sans-serif;
+  background-color: #f7f7f7;
+}
+
+h1 {
+  margin-bottom: 12px;
+}
+
+.card {
+  width: 450px;
+  margin: 40px;
+  border: 4px solid #222;
+}
+
+.card::after {
+  content: "";
+  display: block;
+}
+
+.avatar {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.data {
+  padding: 32px;
+  padding-top: 24px;
+}
+
+.skill-list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.skill {
+  padding: 2px 12px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+```
+current output
+
+![img_20.png](img_20.png)
+
+expected output
+
+![img_21.png](img_21.png)
+
+Answer
+```tsx
+function SkillList() {
+    return (
+        <div className="skill-list">
+            {skills.map((skill) => (
+                <Skill skill={skill.skill} color={skill.color} level={skill.level} />
+            ))}
+        </div>
+    );
+}
+
+function Skill({ skill, color, level }) {
+  return (
+    <div className="skill" style={{ backgroundColor: color }}>
+      <span>{skill}</span>
+      <span>
+        {level === "beginner" && "👶"}
+        {level === "intermediate" && "👍"}
+        {level === "advanced" && "💪"}
+      </span>
+    </div>
+  );
+}
+```
