@@ -877,6 +877,141 @@ const Footer = () => {
 ```
 ## 19. Extracting JSX Into a New Component
 
+`Header.tsx`
+```tsx
+import { ModeToggle } from "./mode-toggle";
+
+const Header = () => {
+  return (
+    <div>
+      <nav className="flex items-center justify-between">
+        <ul className="flex gap-5">
+          <li>Items 1</li>
+          <li>Item 2</li>
+        </ul>
+        <ModeToggle />
+      </nav>
+      <header className="self-stretch mt-10">
+        <h1 className="text-[#edc84b] uppercase text-5xl text-center font-light relative block w-full before:block before:content-[''] before:h-[3px] before:w-[4rem] before:bg-[#edc84b] before:absolute before:top-11 before:-left-14 after:block after:content-[''] after:h-[3px] after:w-[4rem] after:bg-[#edc84b] after:absolute after:top-11 after:-right-12">
+          Fast React Pizza Company
+        </h1>
+      </header>
+    </div>
+  );
+};
+
+export default Header;
+
+```
+`Menu.tsx`
+```tsx
+import { FC } from "react";
+import Pizza, { IPizza } from "./Pizza";
+
+type props = {
+  pizzaList: IPizza[];
+};
+
+const Menu: FC<props> = ({ pizzaList }) => {
+  const numberOfPizzas = pizzaList?.length;
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <h2 className="text-2xl dark:border-secondary uppercase py-3 border-t-2 inline-block border-black border-b-2 tracking-wider font-medium">
+        Our Menu
+      </h2>
+      <div className="grid grid-cols-2 gap-12 list-none">
+        {numberOfPizzas > 0 ? (
+          pizzaList.map((pizza) => (
+            <Pizza
+              photoName={pizza.photoName}
+              ingredients={pizza.ingredients}
+              name={pizza.name}
+              price={pizza.price}
+              soldOut
+              key={pizza.name}
+            />
+          ))
+        ) : (
+          <p className="col-span-2 ">
+            we are still working on our menu. Please comeback later
+          </p>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default Menu;
+
+```
+`Pizza.tsx`
+```tsx
+import { FC } from "react";
+
+export interface IPizza {
+  name: string;
+  ingredients: string;
+  price: number;
+  photoName: string;
+  soldOut: boolean;
+}
+const Pizza: FC<IPizza> = ({
+  ingredients,
+  name,
+  photoName,
+  price,
+  soldOut,
+}) => {
+  return (
+    <div className={`flex gap-8 ${soldOut && ""}`}>
+      <img
+        src={photoName}
+        alt="image of a pizza"
+        className="w-32 aspect-square self-start"
+      />
+      <div className="flex flex-col gap-2 py-2">
+        <h3 className="text-xl font-normal">{name}</h3>
+        <p className="text-sm font-light italic mb-auto">{ingredients}</p>
+        <span>{price}</span>
+      </div>
+    </div>
+  );
+};
+
+export default Pizza;
+
+```
+`Footer.tsx`
+```tsx
+import { Button } from "./ui/button";
+
+const Footer = () => {
+  const hours = new Date().getHours();
+
+  const openHour = 12;
+  const closeHour = 22;
+
+  const isOpen = hours >= openHour && hours <= closeHour;
+
+  return (
+    <footer className="text-sm text-center mb-20">
+      {isOpen ? (
+        <div className="flex flex-col items-center gap-6">
+          <p>we are open unit {closeHour}:00. Come Visit us or order In</p>
+          <Button>Order</Button>
+        </div>
+      ) : (
+        <p>
+          we are happy to well come you between {openHour}:00 to {closeHour}:00
+        </p>
+      )}
+    </footer>
+  );
+};
+
+export default Footer;
+
+```
 ## 20. Destructuring Props
 
 ## 21. React Fragments
