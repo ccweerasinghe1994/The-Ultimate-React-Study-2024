@@ -135,6 +135,11 @@ export default MyButton;
 
 In this example, the `handleClick` function is typed with `MouseEvent<HTMLButtonElement>`, which represents a mouse click event on a button element. When the button is clicked, the `handleClick` function is called, and "Button clicked!" is logged to the console.
 ## 4. What is State in React
+![img_1.png](img_1.png)
+![img_2.png](img_2.png)
+![img_3.png](img_3.png)
+![img_4.png](img_4.png)
+![img_5.png](img_5.png)
 ## 5. Creating a State Variable With useState
 ## 6. Don't Set State Manually!
 ## 7. The Mechanics of State
