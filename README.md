@@ -37,11 +37,12 @@
 
 ## [3.Essential_JavaScript_for_React[✅ plan to cover today]](./docs/3.Essential_JavaScript_for_React/readme.md)
 
-`(🦺⛔ not added) below sections`
 
 ## [5. Working With Components, Props, and JSX](./docs/4.WorkingWithComponentsPropsandJSX/readme.md)
 
-## 6. State, Events, and Forms Interactive Components
+`(🦺⛔ not added) below sections`
+
+## [6. State, Events, and Forms Interactive Components](./docs/6.State_Events_and_Forms_Interactive_Components/readme.md)
 
 ## 7. Thinking In React State Management
 
