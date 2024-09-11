@@ -5,6 +5,19 @@
   - [2. Let's Build a Steps Component](#2-lets-build-a-steps-component)
   - [3. Handling Events the React Way](#3-handling-events-the-react-way)
   - [4. What is State in React](#4-what-is-state-in-react)
+    - [1. **What is State and Why Do We Need It?**](#1-what-is-state-and-why-do-we-need-it)
+      - [Why is State Important?](#why-is-state-important)
+      - [Example:](#example)
+    - [2. **How to Use State in Practice**](#2-how-to-use-state-in-practice)
+      - [a) **useState** (for local component state)](#a-usestate-for-local-component-state)
+      - [b) **useReducer** (for more complex state logic)](#b-usereducer-for-more-complex-state-logic)
+      - [c) **Context API** (for sharing state across components)](#c-context-api-for-sharing-state-across-components)
+    - [3. **Thinking About State**](#3-thinking-about-state)
+      - [a) **When to use state**:](#a-when-to-use-state)
+      - [b) **Where to place state**:](#b-where-to-place-state)
+      - [Example:](#example-1)
+      - [c) **Types of state**:](#c-types-of-state)
+    - [Conclusion](#conclusion)
   - [5. Creating a State Variable With useState](#5-creating-a-state-variable-with-usestate)
   - [6. Don't Set State Manually!](#6-dont-set-state-manually)
   - [7. The Mechanics of State](#7-the-mechanics-of-state)
@@ -209,138 +222,237 @@ copy these `vanila.html` file
 ```
 ## 2. Let's Build a Steps Component
 ```tsx
-import { ReactNode } from "react";
-import { useParams } from "react-router-dom";
+const messages: string[] = [
+    "Learn React ⚛️",
+    "Apply for jobs 💼",
+    "Invest your new income 🤑",
+];
 
-const StepPage = () => {
-  const { stepId } = useParams<{ stepId: string }>();
-  let step: ReactNode = null;
+function App() {
 
-  if (stepId && !parseInt(stepId)) {
-    throw new Error("Invalid Route");
-  }
+    const step = 3;
 
-  if (stepId && parseInt(stepId) === 1) {
-    step = <h1>Learn React</h1>;
-  }
+    const handleNext = () => {
+    };
+    const handlePrevious = () => {
+    };
 
-  if (stepId && parseInt(stepId) === 2) {
-    step = <h1>Apply For a Job</h1>;
-  }
+    return (
+        <div className={'steps'}>
+            <div className="numbers">
+                <div className={`${step >= 1 ? 'active' : ''}`}>1</div>
+                <div className={`${step >= 2 ? 'active' : ''}`}>2</div>
+                <div className={`${step >= 3 ? 'active' : ''}`}>3</div>
+            </div>
+            <div className="message">
+                step {step}:{messages[step]}
+            </div>
+            <div className="buttons">
+                <button onClick={handlePrevious} style={{
+                    backgroundColor: "#7950f2",
+                    color: "#fff",
+                }}>Previous
+                </button>
+                <button onClick={handleNext} style={{
+                    backgroundColor: "#7950f2",
+                    color: "#fff",
+                }}>Next
+                </button>
+            </div>
+        </div>
+    )
+}
 
-  if (stepId && parseInt(stepId) === 3) {
-    step = <h1>Invest Your Income</h1>;
-  }
-  return <div className={"h-[50vh] mx-auto text-center"}>{step}</div>;
-};
-
-export default StepPage;
-
-```
-
-```tsx
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
-import { Link, useParams, useNavigate } from "react-router-dom";
-
-const PaginationPage = () => {
-  const { stepId } = useParams();
-  const navigate = useNavigate();
-  const currentPage: number = (stepId && parseInt(stepId)) || 1;
-  const pageCount = 3;
-
-  const handlePrevious = (currentPage: number) => {
-    if (currentPage <= 1) {
-      return;
-    }
-    navigate(`/step/${currentPage - 1}`);
-  };
-
-  const handleNext = (currentPage: number) => {
-    if (currentPage < pageCount) {
-      navigate(`/step/${currentPage + 1}`);
-    }
-  };
-
-  return (
-    <Pagination>
-      <PaginationContent>
-        <PaginationItem>
-          <PaginationPrevious onClick={() => handlePrevious(currentPage)} />
-        </PaginationItem>
-        <PaginationItem
-          className={`${
-            currentPage === 1 && "outline outline-1 outline-primary"
-          }`}
-        >
-          <Link to={`/step/1`}>
-            <PaginationLink>1</PaginationLink>
-          </Link>
-        </PaginationItem>
-        <PaginationItem
-          className={`${
-            currentPage === 2 && "outline outline-1 outline-primary"
-          }`}
-        >
-          <Link to={`/step/2`}>
-            <PaginationLink>2</PaginationLink>
-          </Link>
-        </PaginationItem>
-        <PaginationItem
-          className={`${
-            currentPage === 3 && "outline outline-1 outline-primary"
-          }`}
-        >
-          <Link to={`/step/3`}>
-            <PaginationLink>3</PaginationLink>
-          </Link>
-        </PaginationItem>
-        <PaginationItem>
-          <PaginationEllipsis />
-        </PaginationItem>
-        <PaginationItem onClick={() => handleNext(currentPage)}>
-          <PaginationNext />
-        </PaginationItem>
-      </PaginationContent>
-    </Pagination>
-  );
-};
-
-export default PaginationPage;
+export default App
 
 ```
-![img.png](img.png)
+
 ## 3. Handling Events the React Way
 In TypeScript with React, handling events is similar to how it's done in JavaScript. However, you need to specify the type of event you're handling. Here's an example of how to handle a click event in TypeScript with React:
 
-```tsx
-import React, { MouseEvent } from 'react';
-
-const MyButton: React.FC = () => {
-  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
-    console.log('Button clicked!');
-  }
-
-  return (
-    <button onClick={handleClick}>
-      Click me
-    </button>
-  );
-}
-
-export default MyButton;
-```
 
 In this example, the `handleClick` function is typed with `MouseEvent<HTMLButtonElement>`, which represents a mouse click event on a button element. When the button is clicked, the `handleClick` function is called, and "Button clicked!" is logged to the console.
 ## 4. What is State in React
 ![img_1.png](img_1.png)
+The image you’ve provided introduces the concept of **state** in React and how it’s fundamental for React developers to master. The image highlights three major topics related to React state:
+
+1. **What is state and why do we need it?**
+2. **How to use state in practice?**
+3. **Thinking about state**
+
+Let’s break these down one by one with in-depth explanations and examples to help you fully understand these key aspects of React state.
+
+### 1. **What is State and Why Do We Need It?**
+
+**State** in React refers to the data that can change over time and is specific to a component. React components can maintain their own state, and when this state changes, the component re-renders to reflect the updated data.
+
+#### Why is State Important?
+State is crucial because it allows React components to be dynamic and interactive. Without state, a React component would be static, unable to update based on user interaction or data changes.
+
+#### Example:
+
+Consider a simple counter component. The state will hold the current count, and every time a user clicks the "Increment" button, the count will update, and the UI will re-render to reflect the new value.
+
+```jsx
+import React, { useState } from 'react';
+
+function Counter() {
+  const [count, setCount] = useState(0); // Initial state is 0
+
+  return (
+    <div>
+      <h1>{count}</h1>
+      <button onClick={() => setCount(count + 1)}>Increment</button>
+    </div>
+  );
+}
+
+export default Counter;
+```
+
+- **useState(0)** initializes the count to 0.
+- **setCount** updates the count state.
+- Every time the button is clicked, the count state changes, triggering a re-render of the component.
+
+Without state, the component would be unable to keep track of the count or update dynamically when the button is pressed.
+
+### 2. **How to Use State in Practice**
+
+In practice, there are different ways to manage state depending on the complexity of the app. Here are some of the key tools and techniques:
+
+#### a) **useState** (for local component state)
+`useState` is used for managing local state in functional components.
+
+```jsx
+const [state, setState] = useState(initialValue);
+```
+
+Example:
+
+```jsx
+const [name, setName] = useState("John");
+```
+
+This holds the current name as a state and updates it whenever needed.
+
+#### b) **useReducer** (for more complex state logic)
+
+`useReducer` is an alternative to `useState` for managing more complex state logic, such as multiple state values or actions.
+
+Example:
+
+```jsx
+const initialState = { count: 0 };
+
+function reducer(state, action) {
+  switch (action.type) {
+    case 'increment':
+      return { count: state.count + 1 };
+    case 'decrement':
+      return { count: state.count - 1 };
+    default:
+      throw new Error();
+  }
+}
+
+function Counter() {
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  return (
+    <div>
+      <h1>{state.count}</h1>
+      <button onClick={() => dispatch({ type: 'increment' })}>+</button>
+      <button onClick={() => dispatch({ type: 'decrement' })}>-</button>
+    </div>
+  );
+}
+```
+
+In this example:
+- We use `useReducer` to handle actions like increment and decrement.
+- It is especially useful when state changes are complex or involve multiple steps.
+
+#### c) **Context API** (for sharing state across components)
+
+The **Context API** is used when you need to share state between multiple components without having to pass props down manually at every level (also called "prop drilling"). It provides a way to create global state that can be accessed by any component in the tree.
+
+Example:
+
+```jsx
+const ThemeContext = React.createContext('light');
+
+function App() {
+  return (
+    <ThemeContext.Provider value="dark">
+      <Toolbar />
+    </ThemeContext.Provider>
+  );
+}
+
+function Toolbar() {
+  return (
+    <div>
+      <ThemedButton />
+    </div>
+  );
+}
+
+function ThemedButton() {
+  const theme = React.useContext(ThemeContext);
+  return <button style={{ background: theme === 'dark' ? '#333' : '#FFF' }}>Themed Button</button>;
+}
+```
+
+Here:
+- `ThemeContext` is a context that holds the current theme (either light or dark).
+- `useContext` is used inside `ThemedButton` to access the theme value from the context.
+
+This helps avoid passing props through every component in the tree.
+
+### 3. **Thinking About State**
+
+When building applications, thinking about how you manage state is critical. React developers need to consider:
+
+#### a) **When to use state**:
+Use state when:
+- You need dynamic values that change based on user input, API responses, or time.
+- The component’s output depends on this changing value.
+
+#### b) **Where to place state**:
+State should be placed at the **closest common ancestor** of all components that need to use or update the state. This concept is called "lifting state up."
+
+For example, if two sibling components both need to access the same piece of state, it should be lifted to the parent of both siblings, so that it can be passed down as props.
+
+#### Example:
+If `ComponentA` and `ComponentB` both need access to `count`, you would lift the `count` state to their parent and pass it down:
+
+```jsx
+function ParentComponent() {
+  const [count, setCount] = useState(0);
+
+  return (
+    <div>
+      <ComponentA count={count} />
+      <ComponentB count={count} setCount={setCount} />
+    </div>
+  );
+}
+```
+
+#### c) **Types of state**:
+React developers often deal with different types of state:
+- **Local State**: Managed within a single component.
+- **Global State**: Shared across multiple components (often managed by Context API or Redux).
+- **Server State**: Data fetched from external APIs (can be handled with libraries like `react-query`).
+- **URL State**: State stored in the URL (e.g., query parameters).
+
+---
+
+### Conclusion
+
+State is central to building interactive and dynamic React applications. Understanding how and where to manage state helps developers write more efficient, scalable, and maintainable code. Key tools like `useState`, `useReducer`, and the Context API, along with thoughtful state management practices, enable developers to solve complex UI challenges.
+
+This image emphasizes that state is the most important concept in React, as it underpins the dynamic nature of the library. The first section introduces state, while subsequent sections dive deeper into how to practically use and think about state in React applications.
 ![img_2.png](img_2.png)
 ![img_3.png](img_3.png)
 ![img_4.png](img_4.png)

@@ -1,11 +1,11 @@
 # Ultimate React Study
 
 - [Ultimate React Study](#ultimate-react-study)
-  - [1.WEB\_FUNDAMENTALS\[✅ plan to cover today\]](#1web_fundamentals-plan-to-cover-today)
-  - [2. A First Look at React\[✅ plan to cover today\]](#2-a-first-look-at-react-plan-to-cover-today)
-  - [3.Essential\_JavaScript\_for\_React\[✅ plan to cover today\]](#3essential_javascript_for_react-plan-to-cover-today)
-  - [5. Working With Components, Props, and JSX](#5-working-with-components-props-and-jsx)
-  - [6. State, Events, and Forms Interactive Components](#6-state-events-and-forms-interactive-components)
+  - [1.WEB\_FUNDAMENTALS](#1web_fundamentals)
+  - [2. A First Look at React](#2-a-first-look-at-react)
+  - [3.Essential\_JavaScript\_for\_React](#3essential_javascript_for_react)
+  - [4. Working With Components, Props, and JSX](#4-working-with-components-props-and-jsx)
+  - [5. State, Events, and Forms Interactive Components](#5-state-events-and-forms-interactive-components)
   - [7. Thinking In React State Management](#7-thinking-in-react-state-management)
   - [8. \[Optional\] Practice Project](#8-optional-practice-project)
   - [9. PART 2 INTERMEDIATE REACT](#9-part-2-intermediate-react)
@@ -31,19 +31,19 @@
   - [29. \[Optional\] Implementing More Features Authentication, Dark Mode, Dashboard, etc](#29-optional-implementing-more-features-authentication-dark-mode-dashboard-etc)
   - [30. Deployment With Netlify and Vercel](#30-deployment-with-netlify-and-vercel)
 
-## [1.WEB_FUNDAMENTALS[✅ plan to cover today]](./docs/1.PART_REACT_FUNDAMENTALS/readme.md)
+## [1.WEB_FUNDAMENTALS](./docs/1.PART_REACT_FUNDAMENTALS/readme.md)
 
-## [2. A First Look at React[✅ plan to cover today]](./docs/2..A_First_Look_at%20_React/readme.md)
+## [2. A First Look at React](./docs/2..A_First_Look_at%20_React/readme.md)
 
-## [3.Essential_JavaScript_for_React[✅ plan to cover today]](./docs/3.Essential_JavaScript_for_React/readme.md)
+## [3.Essential_JavaScript_for_React](./docs/3.Essential_JavaScript_for_React/readme.md)
 
 
-## [5. Working With Components, Props, and JSX](./docs/4.WorkingWithComponentsPropsandJSX/readme.md)
+## [4. Working With Components, Props, and JSX](./docs/4.WorkingWithComponentsPropsandJSX/readme.md)
+
+
+## [5. State, Events, and Forms Interactive Components](./docs/6.State_Events_and_Forms_Interactive_Components/readme.md)
 
 `(🦺⛔ not added) below sections`
-
-## [6. State, Events, and Forms Interactive Components](./docs/6.State_Events_and_Forms_Interactive_Components/readme.md)
-
 ## 7. Thinking In React State Management
 
 ## 8. [Optional] Practice Project
