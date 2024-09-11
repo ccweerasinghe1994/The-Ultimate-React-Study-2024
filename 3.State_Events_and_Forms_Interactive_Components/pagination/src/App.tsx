@@ -1,3 +1,5 @@
+import {useState} from "react";
+
 const messages: string[] = [
     "Learn React ⚛️",
     "Apply for jobs 💼",
@@ -6,11 +8,19 @@ const messages: string[] = [
 
 function App() {
 
-    const step = 3;
+    const [step, setStep] = useState<number>(1);
 
     const handleNext = () => {
+        if (step === 3) {
+            return;
+        }
+        setStep(step + 1);
     };
     const handlePrevious = () => {
+        if (step === 1) {
+            return;
+        }
+        setStep(step - 1);
     };
 
     return (
@@ -21,7 +31,7 @@ function App() {
                 <div className={`${step >= 3 ? 'active' : ''}`}>3</div>
             </div>
             <div className="message">
-                step {step}:{messages[step]}
+                step {step}:{messages[step - 1]}
             </div>
             <div className="buttons">
                 <button onClick={handlePrevious} style={{

@@ -43,6 +43,21 @@
     - [State Allows Developers To:](#state-allows-developers-to)
     - [Final Takeaway:](#final-takeaway)
   - [5. Creating a State Variable With useState](#5-creating-a-state-variable-with-usestate)
+    - [1. Importing React Dependencies](#1-importing-react-dependencies)
+    - [2. Defining an Array of Messages](#2-defining-an-array-of-messages)
+    - [3. Defining the Main `App` Component](#3-defining-the-main-app-component)
+    - [4. Using `useState` to Manage the Current Step](#4-using-usestate-to-manage-the-current-step)
+      - [Example:](#example-4)
+    - [5. Handling the "Next" Button Click](#5-handling-the-next-button-click)
+      - [Example:](#example-5)
+    - [6. Handling the "Previous" Button Click](#6-handling-the-previous-button-click)
+      - [Example:](#example-6)
+    - [7. Rendering the UI](#7-rendering-the-ui)
+      - [a. Step Numbers](#a-step-numbers)
+      - [b. Message Display](#b-message-display)
+      - [c. Buttons](#c-buttons)
+    - [Full Example of Behavior](#full-example-of-behavior)
+    - [Key Points:](#key-points)
   - [6. Don't Set State Manually!](#6-dont-set-state-manually)
   - [7. The Mechanics of State](#7-the-mechanics-of-state)
   - [8. Adding Another Piece of State](#8-adding-another-piece-of-state)
@@ -857,6 +872,232 @@ In summary:
 - Updating **state** triggers a re-render, keeping the UI in sync with the underlying data.
 
 ## 5. Creating a State Variable With useState
+
+```tsx
+import {useState} from "react";
+
+const messages: string[] = [
+    "Learn React ⚛️",
+    "Apply for jobs 💼",
+    "Invest your new income 🤑",
+];
+
+function App() {
+
+    const [step, setStep] = useState<number>(1);
+
+    const handleNext = () => {
+        if (step === 3) {
+            return;
+        }
+        setStep(step + 1);
+    };
+    const handlePrevious = () => {
+        if (step === 1) {
+            return;
+        }
+        setStep(step - 1);
+    };
+
+    return (
+        <div className={'steps'}>
+            <div className="numbers">
+                <div className={`${step >= 1 ? 'active' : ''}`}>1</div>
+                <div className={`${step >= 2 ? 'active' : ''}`}>2</div>
+                <div className={`${step >= 3 ? 'active' : ''}`}>3</div>
+            </div>
+            <div className="message">
+                step {step}:{messages[step - 1]}
+            </div>
+            <div className="buttons">
+                <button onClick={handlePrevious} style={{
+                    backgroundColor: "#7950f2",
+                    color: "#fff",
+                }}>Previous
+                </button>
+                <button onClick={handleNext} style={{
+                    backgroundColor: "#7950f2",
+                    color: "#fff",
+                }}>Next
+                </button>
+            </div>
+        </div>
+    )
+}
+
+export default App
+```
+![alt text](image.png)
+
+In this React component, we are building a simple multi-step interface using the `useState` hook to manage state. The interface displays steps, messages corresponding to each step, and buttons to navigate between steps.
+
+Let’s break down the code deeply, step by step, to fully understand what’s happening:
+
+### 1. Importing React Dependencies
+
+```js
+import { useState } from "react";
+```
+
+We are importing the `useState` hook from React. This hook allows us to create and manage state variables in a functional component. In this case, we will use `useState` to track the current step in our multi-step interface.
+
+### 2. Defining an Array of Messages
+
+```js
+const messages: string[] = [
+    "Learn React ⚛️",
+    "Apply for jobs 💼",
+    "Invest your new income 🤑",
+];
+```
+
+This is a simple array named `messages`, containing three strings. Each string represents a message associated with one of the steps in our interface:
+
+- Step 1: "Learn React ⚛️"
+- Step 2: "Apply for jobs 💼"
+- Step 3: "Invest your new income 🤑"
+
+### 3. Defining the Main `App` Component
+
+```js
+function App() {
+```
+
+This is the main component of our app. It encapsulates the entire functionality of our multi-step interface.
+
+### 4. Using `useState` to Manage the Current Step
+
+```js
+const [step, setStep] = useState<number>(1);
+```
+
+Here, we declare a state variable `step` using `useState`. The initial value is set to `1`, meaning we start at the first step. `setStep` is the function we use to update the `step` state whenever the user clicks "Next" or "Previous."
+
+#### Example:
+
+- At the start, `step` is `1`, so the UI will show the first step and its message ("Learn React ⚛️").
+
+### 5. Handling the "Next" Button Click
+
+```js
+const handleNext = () => {
+    if (step === 3) {
+        return;
+    }
+    setStep(step + 1);
+};
+```
+
+`handleNext` is a function that will be triggered when the "Next" button is clicked. It checks whether the current step is `3` (the last step). If the step is `3`, it returns early, preventing further updates. If not, it increments the `step` by `1`.
+
+#### Example:
+
+- If `step` is `1`, clicking "Next" will increment `step` to `2`, displaying the second message ("Apply for jobs 💼").
+- If `step` is `3`, clicking "Next" does nothing.
+
+### 6. Handling the "Previous" Button Click
+
+```js
+const handlePrevious = () => {
+    if (step === 1) {
+        return;
+    }
+    setStep(step - 1);
+};
+```
+
+`handlePrevious` is triggered when the "Previous" button is clicked. It checks whether the current step is `1` (the first step). If the step is `1`, it returns early, preventing the state from decreasing further. If not, it decrements the `step` by `1`.
+
+#### Example:
+
+- If `step` is `2`, clicking "Previous" will decrement `step` to `1`, displaying the first message ("Learn React ⚛️").
+- If `step` is `1`, clicking "Previous" does nothing.
+
+### 7. Rendering the UI
+
+```js
+return (
+    <div className={'steps'}>
+        <div className="numbers">
+            <div className={`${step >= 1 ? 'active' : ''}`}>1</div>
+            <div className={`${step >= 2 ? 'active' : ''}`}>2</div>
+            <div className={`${step >= 3 ? 'active' : ''}`}>3</div>
+        </div>
+        <div className="message">
+            step {step}:{messages[step - 1]}
+        </div>
+        <div className="buttons">
+            <button onClick={handlePrevious} style={{
+                backgroundColor: "#7950f2",
+                color: "#fff",
+            }}>Previous</button>
+            <button onClick={handleNext} style={{
+                backgroundColor: "#7950f2",
+                color: "#fff",
+            }}>Next</button>
+        </div>
+    </div>
+);
+```
+
+Here’s how this part works:
+
+#### a. Step Numbers
+
+```js
+<div className="numbers">
+    <div className={`${step >= 1 ? 'active' : ''}`}>1</div>
+    <div className={`${step >= 2 ? 'active' : ''}`}>2</div>
+    <div className={`${step >= 3 ? 'active' : ''}`}>3</div>
+</div>
+```
+
+- This section renders three step numbers: "1", "2", and "3".
+- It uses a ternary expression to dynamically add the class `active` to the step number when the current `step` is greater than or equal to that number. For example, when `step` is `2`, both step `1` and step `2` will have the `active` class, which could be used to style them differently (e.g., highlighting the steps).
+
+#### b. Message Display
+
+```js
+<div className="message">
+    step {step}:{messages[step - 1]}
+</div>
+```
+
+- This displays the current step number and its corresponding message from the `messages` array. 
+- Since arrays are zero-indexed, we use `messages[step - 1]` to access the correct message. For example, if `step` is `1`, `messages[0]` is "Learn React ⚛️".
+
+#### c. Buttons
+
+```js
+<div className="buttons">
+    <button onClick={handlePrevious} style={{
+        backgroundColor: "#7950f2",
+        color: "#fff",
+    }}>Previous</button>
+    <button onClick={handleNext} style={{
+        backgroundColor: "#7950f2",
+        color: "#fff",
+    }}>Next</button>
+</div>
+```
+
+- There are two buttons: "Previous" and "Next."
+- The `onClick` attribute specifies which function (`handlePrevious` or `handleNext`) should be called when the button is clicked.
+- The `style` attribute applies inline CSS, giving the buttons a consistent appearance (purple background and white text).
+
+### Full Example of Behavior
+
+1. **Initial State**: The component loads with `step` set to `1`. The displayed message is "Learn React ⚛️", and step `1` is marked as active.
+2. **Click "Next"**: The `step` is incremented to `2`, the message updates to "Apply for jobs 💼", and steps `1` and `2` are marked as active.
+3. **Click "Next" Again**: The `step` is incremented to `3`, the message updates to "Invest your new income 🤑", and steps `1`, `2`, and `3` are marked as active.
+4. **Click "Next" Once More**: Since `step` is already `3`, nothing happens.
+5. **Click "Previous"**: The `step` is decremented to `2`, the message updates to "Apply for jobs 💼", and step `3` is no longer active.
+
+### Key Points:
+
+- **State Management**: `useState` tracks the current step and updates it when buttons are clicked.
+- **Dynamic UI**: The step number and message are dynamically updated based on the state (`step`).
+- **Conditional Rendering**: We conditionally apply the `active` class to style the step numbers differently as the user progresses through the steps.
 ## 6. Don't Set State Manually!
 ## 7. The Mechanics of State
 ## 8. Adding Another Piece of State
