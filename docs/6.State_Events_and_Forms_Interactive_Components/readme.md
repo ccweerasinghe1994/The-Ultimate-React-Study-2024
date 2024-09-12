@@ -88,7 +88,45 @@
     - [Summary of Key Concepts:](#summary-of-key-concepts)
   - [8. Adding Another Piece of State](#8-adding-another-piece-of-state)
   - [9. React Developer Tools](#9-react-developer-tools)
+    - [How to Install React Developer Tools](#how-to-install-react-developer-tools)
+    - [Key Features of React Developer Tools](#key-features-of-react-developer-tools)
+    - [1. **Component Tree Inspection**](#1-component-tree-inspection)
+      - [Example:](#example-10)
+    - [2. **Inspecting Component State and Props**](#2-inspecting-component-state-and-props)
+      - [Example:](#example-11)
+      - [Example with Props:](#example-with-props)
+    - [3. **Editing Props and State in DevTools**](#3-editing-props-and-state-in-devtools)
+      - [Example:](#example-12)
+    - [4. **Hooks Inspection**](#4-hooks-inspection)
+      - [Example:](#example-13)
+    - [5. **Component Re-render Tracking**](#5-component-re-render-tracking)
+      - [Example:](#example-14)
+    - [6. **Profiler**](#6-profiler)
+      - [Example:](#example-15)
+    - [7. **View Component Source Code**](#7-view-component-source-code)
+    - [8. **Debug Context and Providers**](#8-debug-context-and-providers)
+      - [Example:](#example-16)
+    - [9. **Error Boundaries**](#9-error-boundaries)
+    - [Real-World Debugging Scenarios](#real-world-debugging-scenarios)
+    - [Conclusion](#conclusion-4)
   - [10. Updating State Based on Current State](#10-updating-state-based-on-current-state)
+    - [Why Updating State Based on Current State Matters](#why-updating-state-based-on-current-state-matters)
+    - [Key Example of Incorrect State Updates](#key-example-of-incorrect-state-updates)
+    - [What Happens Here:](#what-happens-here)
+    - [Functional Form of `setState`](#functional-form-of-setstate)
+    - [How This Works:](#how-this-works)
+    - [Why Use the Functional Form?](#why-use-the-functional-form)
+    - [Another Example: Toggling Boolean State](#another-example-toggling-boolean-state)
+      - [Incorrect Approach:](#incorrect-approach)
+    - [What Happens Here:](#what-happens-here-1)
+    - [Correct Approach Using the Functional Form:](#correct-approach-using-the-functional-form)
+    - [Explanation:](#explanation-1)
+    - [Real-World Example: Updating a List](#real-world-example-updating-a-list)
+      - [Incorrect Approach:](#incorrect-approach-1)
+    - [Issue:](#issue)
+      - [Correct Approach:](#correct-approach-1)
+    - [Explanation:](#explanation-2)
+    - [Key Takeaways:](#key-takeaways-1)
   - [11. More Thoughts About State + State Guidelines](#11-more-thoughts-about-state--state-guidelines)
   - [12. A Vanilla JavaScript Implementation](#12-a-vanilla-javascript-implementation)
   - [13. CHALLENGE #1 Date Counter (v1)](#13-challenge-1-date-counter-v1)
@@ -1405,8 +1443,566 @@ This mechanism ensures that React apps are efficient, responsive, and easy to re
 ![alt text](image-3.png)
 ![alt text](image-4.png)
 ## 8. Adding Another Piece of State
+
+```tsx
+import {useState} from "react";
+
+const messages: string[] = [
+    "Learn React ⚛️",
+    "Apply for jobs 💼",
+    "Invest your new income 🤑",
+];
+
+function App() {
+
+    const [step, setStep] = useState<number>(1);
+    const [isOpened, setIsOpened] = useState<boolean>(true);
+
+    const handleNext = () => {
+        if (step === 3) {
+            return;
+        }
+        setStep(step + 1);
+    };
+    const handlePrevious = () => {
+        if (step === 1) {
+            return;
+        }
+        setStep(step - 1);
+    };
+
+    return (
+        <>
+            <div className="close" onClick={() => setIsOpened(!isOpened)}>&times;</div>
+            {
+                isOpened ? <div className={'steps'}>
+                    <div className="numbers">
+                        <div className={`${step >= 1 ? 'active' : ''}`}>1</div>
+                        <div className={`${step >= 2 ? 'active' : ''}`}>2</div>
+                        <div className={`${step >= 3 ? 'active' : ''}`}>3</div>
+                    </div>
+                    <div className="message">
+                        step {step}:{messages[step - 1]}
+                    </div>
+                    <div className="buttons">
+                        <button onClick={handlePrevious} style={{
+                            backgroundColor: "#7950f2",
+                            color: "#fff",
+                        }}>Previous
+                        </button>
+                        <button onClick={handleNext} style={{
+                            backgroundColor: "#7950f2",
+                            color: "#fff",
+                        }}>Next
+                        </button>
+                    </div>
+                </div> : ''
+            }
+
+        </>
+    )
+}
+
+export default App
+
+```
+![alt text](image-5.png)
+
 ## 9. React Developer Tools
+
+![alt text](image-6.png)
+**React Developer Tools** (often referred to as "React DevTools") is a browser extension that provides powerful debugging and inspection capabilities specifically for React applications. It enables developers to inspect React component hierarchies, view component state and props, debug performance issues, and more. It’s a critical tool for React development because it allows us to interact with the inner workings of React applications without manually logging everything.
+
+### How to Install React Developer Tools
+
+You can install React DevTools in two main ways:
+
+1. **Browser Extension**: Available for Chrome, Firefox, and Edge.
+   - **Chrome**: Search for "React Developer Tools" in the Chrome Web Store and click "Add to Chrome."
+   - **Firefox**: Available as an add-on in the Firefox Add-ons store.
+   
+2. **Standalone DevTools**: If you’re working with React Native or Electron, you can install React DevTools as a standalone package using npm:
+   ```bash
+   npm install -g react-devtools
+   react-devtools
+   ```
+
+Once installed, you can access React DevTools in the browser’s developer tools under a new tab called "React".
+
+### Key Features of React Developer Tools
+
+Let’s explore the most important features of React DevTools and how they can help you debug and optimize React applications.
+
+---
+
+### 1. **Component Tree Inspection**
+
+**What it does**: It allows you to view the entire React component hierarchy (the **component tree**) of your application.
+
+When you open React DevTools, you’ll see a tree view of all the components in your app. The tree mirrors the structure of your app’s component hierarchy.
+
+#### Example:
+Let’s say you have the following component structure:
+
+```js
+function App() {
+  return (
+    <div>
+      <Header />
+      <Content />
+      <Footer />
+    </div>
+  );
+}
+
+function Header() { return <h1>Header</h1>; }
+function Content() { return <p>Some content here.</p>; }
+function Footer() { return <footer>Footer</footer>; }
+```
+
+In React DevTools, you’ll see something like this:
+```
+App
+  ├── Header
+  ├── Content
+  └── Footer
+```
+
+You can click on each component in the tree to inspect its details, such as its props, state, and hooks.
+
+### 2. **Inspecting Component State and Props**
+
+**What it does**: When you select a component in the tree, you can view all of its **state**, **props**, and **hooks** in the right-hand pane.
+
+#### Example:
+If you have a `Counter` component that uses state like this:
+
+```js
+function Counter() {
+  const [count, setCount] = useState(0);
+
+  return <p>{count}</p>;
+}
+```
+
+In React DevTools, if you click on the `Counter` component in the tree, you’ll see the current value of `count` (e.g., `0`). You can also see the props being passed to the component (even if there are none).
+
+This is useful for debugging, as you can track how state and props change over time as the user interacts with your app.
+
+#### Example with Props:
+
+```js
+function Welcome({ name }) {
+  return <h1>Hello, {name}!</h1>;
+}
+```
+
+In the DevTools, when you click on the `Welcome` component, you’ll see the value of the `name` prop. If `name="John"`, it will display:
+```
+Props:
+  name: "John"
+```
+
+### 3. **Editing Props and State in DevTools**
+
+**What it does**: One of the most powerful features of React DevTools is that you can directly edit the **state** and **props** of a component and see how it affects the UI.
+
+#### Example:
+If you have the `Counter` component from above and you see that the `count` state is `0`, you can manually edit the state in the DevTools to `5`, and the app will immediately reflect that change in the UI.
+
+This is extremely useful for quickly testing how different state values affect the UI without having to interact with the app manually or write test code.
+
+### 4. **Hooks Inspection**
+
+React DevTools also allow you to inspect the values of **React hooks**, such as `useState` and `useEffect`.
+
+#### Example:
+If a component is using hooks like this:
+
+```js
+function Profile() {
+  const [username, setUsername] = useState("JohnDoe");
+  useEffect(() => {
+    console.log(username);
+  }, [username]);
+
+  return <div>{username}</div>;
+}
+```
+
+In React DevTools, when you click on `Profile`, you’ll see the current value of `username` under a section labeled **Hooks**. You’ll also be able to track changes to hooks as they occur during interactions with the app.
+
+### 5. **Component Re-render Tracking**
+
+**What it does**: React DevTools highlights components that re-render when their state or props change. This is helpful for identifying **unnecessary re-renders**, which can hurt performance.
+
+You can use this feature by enabling **"Highlight Updates"** from the settings. When enabled, each time your app updates, components that are re-rendered will flash with a color overlay, helping you identify parts of the app that are updating too often or unnecessarily.
+
+#### Example:
+Let’s say you have a component that renders a list:
+
+```js
+function ItemList({ items }) {
+  return (
+    <ul>
+      {items.map((item, index) => (
+        <li key={index}>{item}</li>
+      ))}
+    </ul>
+  );
+}
+```
+
+If `ItemList` is re-rendering too frequently, you can spot this visually using the "Highlight Updates" feature, allowing you to optimize the component by using `React.memo` or other techniques to prevent unnecessary re-renders.
+
+### 6. **Profiler**
+
+**What it does**: The **Profiler** tool helps you measure the performance of your React app. It records how often components are rendered and how long these renders take. This is useful for identifying performance bottlenecks.
+
+To use the Profiler:
+- Open React DevTools and click the **Profiler** tab.
+- Click "Record" to start recording the app’s behavior.
+- Interact with your app (e.g., click buttons, type in inputs, etc.).
+- Click "Stop" to stop recording.
+
+React DevTools will show you a flame graph that visualizes how long each component took to render.
+
+#### Example:
+Suppose you have a form that updates its state on every keystroke:
+
+```js
+function SearchBox() {
+  const [query, setQuery] = useState("");
+
+  return (
+    <input
+      value={query}
+      onChange={(e) => setQuery(e.target.value)}
+      placeholder="Search..."
+    />
+  );
+}
+```
+
+If the search box causes the entire page to re-render on every keystroke, you’ll see this in the Profiler, allowing you to optimize the search box to prevent unnecessary re-renders.
+
+### 7. **View Component Source Code**
+
+You can also click a component in React DevTools and navigate directly to the source code in your IDE (if configured correctly with source maps). This is especially helpful in large projects where it can be difficult to find the exact component you’re inspecting.
+
+### 8. **Debug Context and Providers**
+
+If you’re using **React Context** to pass data through the component tree, React DevTools allows you to inspect the current value of the context for any component. This is helpful to ensure that the correct context value is being passed to your components.
+
+#### Example:
+If you have a theme context:
+
+```js
+const ThemeContext = React.createContext("light");
+
+function App() {
+  return (
+    <ThemeContext.Provider value="dark">
+      <Toolbar />
+    </ThemeContext.Provider>
+  );
+}
+```
+
+In React DevTools, you’ll see the `ThemeContext.Provider` in the component tree, and you can inspect its current value (`dark` in this case).
+
+### 9. **Error Boundaries**
+
+If a component has encountered an error and is wrapped with an **Error Boundary**, you can inspect the details of the error in DevTools. This helps debug why a component failed to render.
+
+---
+
+### Real-World Debugging Scenarios
+
+1. **Debugging Missing Props**:
+   You can use React DevTools to verify if a component is receiving the correct props, especially in complex applications where props are passed through multiple layers.
+
+2. **Debugging Performance Issues**:
+   Use the **Profiler** to identify components that are re-rendering too frequently. If a component like a navigation bar re-renders every time the app updates, you can optimize it using memoization (`React.memo`) to prevent unnecessary re-renders.
+
+3. **Tracking State Across Updates**:
+   Use the "Inspect state" feature to track how state changes after specific user interactions. For example, you can see how a form’s state changes as the user types in it, making it easier to debug issues related to form validation.
+
+---
+
+### Conclusion
+
+React Developer Tools is a must-have for React developers, offering powerful features to inspect, debug, and optimize your React applications. By using DevTools, you can easily inspect component hierarchies, state, and props, track performance with the Profiler, and spot inefficiencies or bugs in your React code. Whether you’re developing a small app or working on a large-scale project, React DevTools is invaluable for improving your productivity and code quality.
 ## 10. Updating State Based on Current State
+
+```tsx
+import {useState} from "react";
+
+const messages: string[] = [
+    "Learn React ⚛️",
+    "Apply for jobs 💼",
+    "Invest your new income 🤑",
+];
+
+function App() {
+
+    const [step, setStep] = useState<number>(1);
+    const [isOpened, setIsOpened] = useState<boolean>(true);
+
+    const handleNext = () => {
+        if (step === 3) {
+            return;
+        }
+        setStep((s) => s + 1);
+    };
+    const handlePrevious = () => {
+        if (step === 1) {
+            return;
+        }
+        setStep((s) => s - 1);
+    };
+
+    return (
+        <>
+            <div className="close" onClick={() => setIsOpened((prevState) => !prevState)}>&times;</div>
+            {
+                isOpened ? <div className={'steps'}>
+                    <div className="numbers">
+                        <div className={`${step >= 1 ? 'active' : ''}`}>1</div>
+                        <div className={`${step >= 2 ? 'active' : ''}`}>2</div>
+                        <div className={`${step >= 3 ? 'active' : ''}`}>3</div>
+                    </div>
+                    <div className="message">
+                        step {step}:{messages[step - 1]}
+                    </div>
+                    <div className="buttons">
+                        <button onClick={handlePrevious} style={{
+                            backgroundColor: "#7950f2",
+                            color: "#fff",
+                        }}>Previous
+                        </button>
+                        <button onClick={handleNext} style={{
+                            backgroundColor: "#7950f2",
+                            color: "#fff",
+                        }}>Next
+                        </button>
+                    </div>
+                </div> : ''
+            }
+
+        </>
+    )
+}
+
+export default App
+
+```
+In React, when you need to **update the state** based on the **current or previous state**, it’s important to understand how React handles state updates to avoid bugs and unexpected behavior.
+
+State updates in React are **asynchronous**. This means that if you update the state and try to access it immediately afterward, you might not get the latest state value. To ensure that your updates are based on the latest version of the state, React provides a functional form of `setState` (for class components) or the `useState` hook’s updater function (for functional components).
+
+### Why Updating State Based on Current State Matters
+
+Let's first explore why this is important:
+
+- **Asynchronous Updates**: React batches state updates for performance reasons. If you try to update the state multiple times in quick succession, relying on the current state might result in incorrect values because React may not have updated the state when your next update is processed.
+  
+- **Previous State Dependency**: If the next state depends on the current state, you need to ensure you're working with the most up-to-date version of the state, especially when dealing with multiple updates in quick succession.
+
+### Key Example of Incorrect State Updates
+
+Let’s start with an example where state is updated incorrectly due to the asynchronous nature of state updates:
+
+```js
+function Counter() {
+  const [count, setCount] = useState(0);
+
+  const increment = () => {
+    // Here we are relying on the old count value.
+    setCount(count + 1); // This uses the current value of 'count'
+    setCount(count + 1); // This also uses the old value of 'count', not the updated one.
+  };
+
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={increment}>Increment</button>
+    </div>
+  );
+}
+```
+
+### What Happens Here:
+
+- Initially, `count` is `0`.
+- When the "Increment" button is clicked, two `setCount(count + 1)` calls are executed sequentially.
+- Both calls refer to the initial value of `count` (`0` in this case), so each `setCount` call sets the state to `1`, but not `2` as you might expect.
+- This is because React **batches** state updates for performance, so the `count + 1` refers to the same, stale value of `count`.
+
+### Functional Form of `setState`
+
+To solve this, React provides a **functional update form** for state setters. This ensures that each state update is based on the most recent state, not the state when the function was initially called.
+
+Here’s the corrected version using the functional form:
+
+```js
+function Counter() {
+  const [count, setCount] = useState(0);
+
+  const increment = () => {
+    // This will ensure each update is based on the most recent state.
+    setCount(prevCount => prevCount + 1); // Increment based on the previous count.
+    setCount(prevCount => prevCount + 1); // Increment again based on the updated count.
+  };
+
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={increment}>Increment</button>
+    </div>
+  );
+}
+```
+
+### How This Works:
+
+- In the functional form of `setCount`, you pass a function that takes the **previous state** (`prevCount` in this case) and returns the new state.
+- The first `setCount` call increments `prevCount` (which starts at `0`) to `1`.
+- The second `setCount` call receives the **updated** `prevCount` (now `1`) and increments it to `2`.
+- As a result, after the button is clicked, the final value of `count` will be `2`, which is the desired behavior.
+
+### Why Use the Functional Form?
+
+The functional form of `setState` or `useState` is useful in scenarios where:
+1. You need to update the state multiple times in quick succession.
+2. The next state depends on the previous state (like incrementing a counter, toggling a boolean, or adding to an array).
+
+This approach ensures you are always working with the most up-to-date version of the state, no matter how many times you update it.
+
+### Another Example: Toggling Boolean State
+
+Let’s look at a common scenario of toggling a boolean value. If you want to toggle a boolean (`true`/`false`) based on its previous value, the functional form is critical:
+
+#### Incorrect Approach:
+
+```js
+function Toggle() {
+  const [isOn, setIsOn] = useState(false);
+
+  const toggle = () => {
+    setIsOn(!isOn); // This relies on the current value of isOn
+    setIsOn(!isOn); // This also relies on the old value of isOn, so it cancels out the first update.
+  };
+
+  return (
+    <div>
+      <p>{isOn ? "ON" : "OFF"}</p>
+      <button onClick={toggle}>Toggle</button>
+    </div>
+  );
+}
+```
+
+### What Happens Here:
+
+- Initially, `isOn` is `false`.
+- When you click the "Toggle" button, two `setIsOn(!isOn)` calls are made in quick succession.
+- Both `setIsOn` calls reference the old `isOn` value (`false`), so the first sets `isOn` to `true`, and the second sets it back to `false`, cancelling out the toggle effect.
+
+### Correct Approach Using the Functional Form:
+
+```js
+function Toggle() {
+  const [isOn, setIsOn] = useState(false);
+
+  const toggle = () => {
+    setIsOn(prevIsOn => !prevIsOn); // This toggles based on the previous state.
+    setIsOn(prevIsOn => !prevIsOn); // The second toggle will now correctly toggle again.
+  };
+
+  return (
+    <div>
+      <p>{isOn ? "ON" : "OFF"}</p>
+      <button onClick={toggle}>Toggle</button>
+    </div>
+  );
+}
+```
+
+### Explanation:
+
+- The first `setIsOn` call receives `prevIsOn` (`false`), and toggles it to `true`.
+- The second `setIsOn` call receives the updated `prevIsOn` (`true`), and toggles it back to `false`.
+- As a result, clicking the "Toggle" button twice will toggle the state correctly.
+
+### Real-World Example: Updating a List
+
+Imagine you have a list of items in your state, and you want to append a new item based on the current list. Using the functional form of state update is essential to ensure that each new item is added based on the latest version of the list.
+
+#### Incorrect Approach:
+
+```js
+function TodoList() {
+  const [todos, setTodos] = useState([]);
+
+  const addTodo = (newTodo) => {
+    setTodos([...todos, newTodo]); // Spread the old 'todos' and add 'newTodo'
+  };
+
+  return (
+    <div>
+      <button onClick={() => addTodo('Buy Milk')}>Add Todo</button>
+      <ul>
+        {todos.map((todo, index) => <li key={index}>{todo}</li>)}
+      </ul>
+    </div>
+  );
+}
+```
+
+### Issue:
+
+- `setTodos([...todos, newTodo])` relies on the **current** value of `todos`, which can lead to race conditions or incorrect appending of items if the state updates are batched.
+
+#### Correct Approach:
+
+```js
+function TodoList() {
+  const [todos, setTodos] = useState([]);
+
+  const addTodo = (newTodo) => {
+    setTodos(prevTodos => [...prevTodos, newTodo]); // Spread the previous state (prevTodos) and add 'newTodo'
+  };
+
+  return (
+    <div>
+      <button onClick={() => addTodo('Buy Milk')}>Add Todo</button>
+      <ul>
+        {todos.map((todo, index) => <li key={index}>{todo}</li>)}
+      </ul>
+    </div>
+  );
+}
+```
+
+### Explanation:
+
+- Here, `setTodos(prevTodos => [...prevTodos, newTodo])` ensures that `prevTodos` always reflects the **latest version** of the `todos` list, even if multiple state updates are batched.
+- This way, you’re appending the new item to the most up-to-date version of the list.
+
+### Key Takeaways:
+
+1. **State Updates Are Asynchronous**: React batches state updates for performance reasons, so updating the state multiple times in quick succession can lead to unexpected results if you rely on stale state values.
+  
+2. **Functional Form of `setState`**: When the next state depends on the previous state, always use the functional form of `setState` or the updater function from `useState`. This ensures that you are working with the latest state value.
+
+3. **Examples Where Functional Form is Critical**:
+   - **Counters** (incrementing/decrementing based on the previous count).
+   - **Toggles** (flipping a boolean value based on the current state).
+   - **Arrays or Lists** (adding/removing items from a list based on the current state).
+   - **Multistep Forms** (navigating form steps based on the current step state).
+
+By using the functional form of state updates, you can ensure that your React applications behave predictably and avoid issues caused by stale or outdated state values.
 ## 11. More Thoughts About State + State Guidelines
 ## 12. A Vanilla JavaScript Implementation
 ## 13. CHALLENGE #1 Date Counter (v1)
