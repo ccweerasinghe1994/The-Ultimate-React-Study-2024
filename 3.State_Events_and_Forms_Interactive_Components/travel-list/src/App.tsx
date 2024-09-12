@@ -11,6 +11,7 @@ type Item = {
 type PropsItem = {
     item: Item;
     onDelete: (id: number) => void;
+    onChange: (id: number) => void;
 };
 
 
@@ -21,6 +22,7 @@ type PropsForm = {
 type PropsPackagingList = {
     items: Item[];
     onDelete: (id: number) => void;
+    onChange: (id: number) => void;
 
 }
 
@@ -35,11 +37,24 @@ function App() {
     const handleDeleteItem = (id: number) => {
         setItems(items.filter(item => item.id !== id));
     }
+
+    const handleItemChange = (id: number) => {
+        setItems(items.map(item => {
+            if (item.id === id) {
+                return {
+                    ...item,
+                    packed: !item.packed
+                }
+            }
+            return item;
+        }))
+    };
+
     return (
         <div className={'app'}>
             <Logo/>
             <Form onAddItem={handleAddItem}/>
-            <PackingList onDelete={handleDeleteItem} items={items}/>
+            <PackingList onDelete={handleDeleteItem} items={items} onChange={handleItemChange}/>
             <Stats/>
         </div>
     )
@@ -100,20 +115,21 @@ const Form: FC<PropsForm> = ({onAddItem}) => {
 };
 
 
-const PackingList: FC<PropsPackagingList> = ({items, onDelete}) => {
+const PackingList: FC<PropsPackagingList> = ({items, onDelete, onChange}) => {
     return (
         <div className={'list'}>
             <ul>
-                {items.map(item => <Item onDelete={onDelete} key={item.id} item={item}/>)}
+                {items.map(item => <Item onDelete={onDelete} key={item.id} item={item} onChange={onChange}/>)}
             </ul>
         </div>
     )
 };
 
 
-const Item: FC<PropsItem> = ({item, onDelete}) => {
+const Item: FC<PropsItem> = ({item, onDelete, onChange}) => {
     return (
         <li>
+            <input type="checkbox" value={item.packed.toString()} onChange={() => onChange(item.id)}/>
             <span style={item.packed ? {textDecoration: 'line-through'} : {}}>
             {item.quantity} {item.description}
             </span>
