@@ -1,0 +1,830 @@
+# 07 - Thinking In React State Management
+
+## 001 Section Overview
+
+![alt text](image.png)
+
+## 002 What is Thinking in React
+
+![alt text](image-1.png)
+![alt text](image-2.png)
+
+The image provides an overview of **"Thinking in React" as a Process**, which breaks down how to design and build React applications effectively by focusing on breaking down the user interface (UI) into components, thinking about state, and establishing a clear data flow. Let’s dive deeper into this process with detailed explanations and examples.
+
+## **The "Thinking in React" Process**
+
+1. **Break the Desired UI into Components**
+2. **Build a Static Version in React (without state)**
+3. **Think About State**
+4. **Establish Data Flow**
+
+These four steps are not rigid but form a flexible workflow that helps guide how to structure and build React applications efficiently.
+
+---
+
+### 1. **Break the Desired UI into Components**
+
+The first step is to look at the entire UI and break it down into components. Each part of the UI that performs a distinct role or functionality can be thought of as a React component. This step involves identifying **reusable components** and figuring out how the **component tree** (or hierarchy) will look.
+
+#### Example:
+
+Imagine you're building a simple **product list** page for an e-commerce site. The UI could look something like this:
+
+- **Header**
+- **Search bar**
+- **Product list**
+  - Each product has:
+    - Image
+    - Name
+    - Price
+    - Add to Cart button
+
+**Breaking the UI into components**:
+
+- `Header`: A static header that could include a logo or navigation links.
+- `SearchBar`: A component that allows users to search for products.
+- `ProductList`: A container that loops through an array of products and displays them.
+- `ProductItem`: Represents an individual product, including the image, name, price, and the button to add the product to the cart.
+
+Here’s a basic **component tree** structure:
+
+```
+App
+ ├── Header
+ ├── SearchBar
+ └── ProductList
+      ├── ProductItem
+      ├── ProductItem
+      └── ProductItem
+```
+
+---
+
+### 2. **Build a Static Version in React (Without State)**
+
+In this step, you’ll take the UI components you’ve identified and build a static version of the application. This static version should **not** involve any state yet—it's purely about rendering the UI structure.
+
+#### Example:
+
+```jsx
+function Header() {
+  return <h1>Product List</h1>;
+}
+
+function SearchBar() {
+  return <input type="text" placeholder="Search products..." />;
+}
+
+function ProductItem() {
+  return (
+    <div className="product-item">
+      <img src="placeholder.jpg" alt="Product" />
+      <p>Product Name</p>
+      <p>$19.99</p>
+      <button>Add to Cart</button>
+    </div>
+  );
+}
+
+function ProductList() {
+  return (
+    <div className="product-list">
+      <ProductItem />
+      <ProductItem />
+      <ProductItem />
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <div>
+      <Header />
+      <SearchBar />
+      <ProductList />
+    </div>
+  );
+}
+
+export default App;
+```
+
+In this static version, the UI is rendered, but there’s no **interactivity** yet. You can view the structure, and make sure all components render as expected.
+
+---
+
+### 3. **Think About State**
+
+Once you have the static UI version, it's time to add **state** to make the application interactive. State is what makes the UI dynamic by allowing components to store and update data.
+
+#### Key Questions to Think About:
+- **When to use state?** – State should be used for data that changes over time or based on user interaction (like form inputs, product data, or a shopping cart).
+- **What type of state?** – Determine whether the state is local (specific to one component) or shared (used by multiple components).
+- **Where to place each piece of state?** – Identify the "owner" component for each piece of state. The owner component should be the highest common ancestor of all components that need access to that state.
+
+#### Example:
+
+Let’s say the **SearchBar** needs to filter the products, and the **ProductList** needs to update based on that search. Here, state is needed for:
+- **Search term** in the `SearchBar`
+- **Filtered products** in the `ProductList`
+
+In this case:
+- The **App** component will manage the state, because both `SearchBar` and `ProductList` need to access or modify the state.
+
+#### Adding State:
+
+```jsx
+import { useState } from 'react';
+
+function App() {
+  const [searchTerm, setSearchTerm] = useState(''); // State for search term
+  const products = [
+    { name: 'Product 1', price: 19.99 },
+    { name: 'Product 2', price: 29.99 },
+    { name: 'Product 3', price: 39.99 }
+  ];
+
+  // Filter products based on search term
+  const filteredProducts = products.filter(product =>
+    product.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <div>
+      <Header />
+      <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+      <ProductList products={filteredProducts} />
+    </div>
+  );
+}
+
+function SearchBar({ searchTerm, setSearchTerm }) {
+  return (
+    <input
+      type="text"
+      placeholder="Search products..."
+      value={searchTerm}
+      onChange={e => setSearchTerm(e.target.value)}
+    />
+  );
+}
+
+function ProductList({ products }) {
+  return (
+    <div className="product-list">
+      {products.map(product => (
+        <ProductItem key={product.name} name={product.name} price={product.price} />
+      ))}
+    </div>
+  );
+}
+
+function ProductItem({ name, price }) {
+  return (
+    <div className="product-item">
+      <p>{name}</p>
+      <p>${price}</p>
+      <button>Add to Cart</button>
+    </div>
+  );
+}
+
+export default App;
+```
+
+### How State Works:
+- **`searchTerm`**: Managed in the `App` component and passed down to `SearchBar` as a prop.
+- **`setSearchTerm`**: A function that updates the state in `App` when the search input changes.
+- **Filtered products**: The `App` component filters the products based on the search term and passes the filtered list to `ProductList`.
+
+---
+
+### 4. **Establish Data Flow**
+
+Once state is managed, the next step is to ensure that the **data flows** correctly throughout the component tree. React has a **one-way data flow** (also known as **unidirectional data flow**), meaning data is passed down from parent to child components through **props**.
+
+#### Key Concepts:
+- **One-way Data Flow**: The parent component holds the state and passes data down to child components as props.
+- **Child-to-Parent Communication**: If a child component needs to update the state in a parent, the parent should pass down a callback function to the child. The child can invoke this function to modify the parent’s state.
+- **Global State (if needed)**: If you have data that needs to be shared across multiple components that are not parent-child, you might use **global state management** (using Context API, Redux, etc.).
+
+#### Example of Data Flow in the Product App:
+
+1. **One-Way Data Flow**: The `App` component holds the product data and the search term state, and passes them as props to `ProductList` and `SearchBar`.
+2. **Child-to-Parent Communication**: The `SearchBar` component doesn’t manage the search term itself. Instead, it receives the `searchTerm` and `setSearchTerm` props from `App`. When the user types in the search box, the `setSearchTerm` function is called, updating the state in the parent `App` component, which in turn re-renders the filtered products.
+3. **Data Flow**: The data flows **downwards** from the `App` component to the `SearchBar` and `ProductList`, and user interactions (like typing a search query) flow **upwards** to update the state in the parent.
+
+---
+
+## **When You Know How to "Think in React"**
+
+When you understand how to "Think in React," you’ll be able to answer several key questions about building your React application:
+
+- **How to break up a UI design into components?**: You’ll know how to divide the UI into reusable components that handle individual pieces of functionality.
+  
+- **How to make components reusable?**: By identifying shared functionality, you can build components that are flexible and reusable across different parts of your application.
+
+- **How to assemble UI from reusable components?**: You’ll be able to construct the full UI by assembling the components, ensuring that state and props are managed correctly.
+
+- **What pieces of state do I need for interactivity?**: You’ll be able to determine which parts of the UI need state for dynamic behavior, and where to place that state.
+
+- **Where to place state?**: You’ll understand which component should "own" each piece of state, ensuring that the right components manage the data they need.
+
+- **What types of state should I use?**: Whether local or global, you’ll know how to structure state based on the needs of your application.
+
+- **How to make data flow through the app?**: You’ll be comfortable passing data through props, handling user inputs, and managing parent-child communication, ensuring that data flows correctly throughout the app.
+
+
+
+## 003 Fundamentals of State Management
+
+![alt text](image-3.png)
+
+The image provides a visual explanation of **state management** in React, focusing on the idea of giving each piece of state a "home" and understanding **when**, **what type**, and **where** to place state in a React application.
+
+### **What is State Management?**
+
+**State management** refers to the process of:
+1. **Deciding when** to create pieces of state.
+2. **Choosing what types** of state are necessary.
+3. **Determining where** to place each piece of state.
+4. **Managing how data flows** through the app to ensure components render and update properly.
+
+State management is essential in React because state is what drives interactivity in applications. Without effectively managing state, the app would not know how to respond to user input, fetch and display data, or keep track of various dynamic elements.
+
+---
+
+### **Giving Each Piece of State a "Home"**
+
+In React, **each piece of state needs a "home"** in the component tree, which means the state must live in the correct component based on the data flow and interaction requirements.
+
+Let’s break this down with examples from the shopping cart application shown in the image:
+
+---
+
+### **Key Pieces of State in the Example**
+
+1. **searchQuery**:
+   - **Where it’s used**: The search bar at the top of the page.
+   - **Purpose**: This state holds the text the user is typing into the search bar.
+   - **Component home**: The **SearchBar** component (or a parent component that handles the search functionality).
+   - **Type**: Local state, because the search query only affects what’s displayed in the search results and doesn’t need to be shared globally.
+   - **Example Code**:
+
+     ```jsx
+     function SearchBar() {
+       const [searchQuery, setSearchQuery] = useState('');
+
+       return (
+         <input
+           type="text"
+           value={searchQuery}
+           onChange={e => setSearchQuery(e.target.value)}
+           placeholder="Search for courses..."
+         />
+       );
+     }
+     ```
+
+     In this example, `searchQuery` is local to the `SearchBar` component, and the `onChange` event updates the search term whenever the user types.
+
+---
+
+2. **shoppingCart**:
+   - **Where it’s used**: The shopping cart section, which shows the items the user has added.
+   - **Purpose**: This state tracks the items currently in the shopping cart.
+   - **Component home**: Likely managed in the **App** component or a **ShoppingCart** component. It’s shared across multiple components (e.g., product pages, checkout, cart), so it needs to be higher in the component hierarchy.
+   - **Type**: Global or shared state, as it affects multiple parts of the app.
+   - **Example Code**:
+
+     ```jsx
+     function App() {
+       const [shoppingCart, setShoppingCart] = useState([
+         { name: "JavaScript Course", price: 12.99 },
+         { name: "Node.js Bootcamp", price: 12.99 },
+       ]);
+
+       return <ShoppingCart cartItems={shoppingCart} />;
+     }
+
+     function ShoppingCart({ cartItems }) {
+       return (
+         <div>
+           {cartItems.map(item => (
+             <div key={item.name}>
+               <p>{item.name}</p>
+               <p>${item.price}</p>
+             </div>
+           ))}
+         </div>
+       );
+     }
+     ```
+
+     In this case, the shopping cart items (`shoppingCart`) are managed in the `App` component because it might be needed by other components like `Checkout`, `ProductList`, or `Header`.
+
+---
+
+3. **user**:
+   - **Where it’s used**: The user profile section, displaying the current user's name and profile picture.
+   - **Purpose**: This state holds the information about the logged-in user.
+   - **Component home**: It’s global or shared state, likely managed at the app level or in a user management service, because other parts of the app might need user information (e.g., cart, notifications, settings).
+   - **Type**: Global state, since the user’s information is relevant across different components.
+   - **Example Code**:
+
+     ```jsx
+     function UserProfile({ user }) {
+       return (
+         <div className="user-profile">
+           <img src={user.profilePicture} alt="User Avatar" />
+           <p>{user.name}</p>
+         </div>
+       );
+     }
+
+     function App() {
+       const [user, setUser] = useState({
+         name: "Jonas Schmedtmann",
+         profilePicture: "avatar.jpg"
+       });
+
+       return <UserProfile user={user} />;
+     }
+     ```
+
+     Here, `user` is a shared piece of state, passed down from `App` to `UserProfile` and potentially other components that need to display or use the user's information.
+
+---
+
+4. **isOpen**:
+   - **Where it’s used**: To toggle whether a dropdown or sidebar is open or closed.
+   - **Purpose**: This state tracks the open/closed state of a dropdown (e.g., the user menu in the top-right corner).
+   - **Component home**: Local state in the component that controls the dropdown (e.g., `UserMenu`).
+   - **Type**: Local state because the toggle only affects the visibility of the menu and doesn’t need to be shared elsewhere.
+   - **Example Code**:
+
+     ```jsx
+     function UserMenu() {
+       const [isOpen, setIsOpen] = useState(false);
+
+       return (
+         <div>
+           <button onClick={() => setIsOpen(!isOpen)}>
+             {isOpen ? "Close" : "Open"} Menu
+           </button>
+           {isOpen && <div className="menu">User Menu Content</div>}
+         </div>
+       );
+     }
+     ```
+
+     The `isOpen` state is local to the `UserMenu` component and controls whether the menu is displayed.
+
+---
+
+5. **coupons**:
+   - **Where it’s used**: The checkout area, showing applied coupons or promotions.
+   - **Purpose**: This state tracks any applied coupons or promotional codes.
+   - **Component home**: Likely managed in the **Checkout** component, though it may also exist in higher-level components if it impacts pricing across different pages.
+   - **Type**: Local state to `Checkout`, but could also be shared if needed by other components.
+   - **Example Code**:
+
+     ```jsx
+     function Checkout() {
+       const [coupons, setCoupons] = useState('');
+
+       return (
+         <div>
+           <input
+             type="text"
+             placeholder="Enter coupon code"
+             value={coupons}
+             onChange={e => setCoupons(e.target.value)}
+           />
+           <button>Apply Coupon</button>
+         </div>
+       );
+     }
+     ```
+
+     The `coupons` state manages the coupon code entered by the user. It might only need to exist within the `Checkout` component unless it influences other sections like product pages.
+
+---
+
+6. **notifications**:
+   - **Where it’s used**: A notifications icon that shows how many notifications the user has.
+   - **Purpose**: This state tracks the number of unread notifications or messages.
+   - **Component home**: Likely a global state, as notifications may need to be displayed or updated in different areas of the application (e.g., the header, notifications page).
+   - **Type**: Global state, because notifications are part of a system-wide feature.
+   - **Example Code**:
+
+     ```jsx
+     function Notifications({ notifications }) {
+       return (
+         <div className="notifications">
+           <p>Unread notifications: {notifications.length}</p>
+         </div>
+       );
+     }
+
+     function App() {
+       const [notifications, setNotifications] = useState([{ id: 1, message: 'New course available!' }]);
+
+       return <Notifications notifications={notifications} />;
+     }
+     ```
+
+     Here, `notifications` is a shared piece of state, passed down to the `Notifications` component to show the user’s current unread notifications.
+
+---
+
+7. **language**:
+   - **Where it’s used**: The footer or settings section, allowing the user to switch the language of the application.
+   - **Purpose**: This state tracks the currently selected language for the interface.
+   - **Component home**: Likely a global state or context, as the language selection affects the entire app's UI.
+   - **Type**: Global state, because the language setting must be shared across all components.
+   - **Example Code**:
+
+     ```jsx
+     function LanguageSelector() {
+       const [language, setLanguage] = useState('English');
+
+       return (
+         <select value={language} onChange={e => setLanguage(e.target.value)}>
+           <option value="English">English</option>
+           <option value="Spanish">Spanish</option>
+         </select>
+       );
+     }
+     ```
+
+     The `language` state is global because it impacts the text and UI across the entire app.
+
+---
+
+### **Deciding Where to Place State**
+
+When deciding **where to place state** in a React application, you should follow these rules:
+
+1. **Identify which component needs the state**: Start by determining which components in the tree need to read or update the state.
+2. **Place state in the closest common ancestor**: If multiple components need the same piece of state, the state should live in their closest common parent.
+3. **Use local state for isolated logic**: If a piece of state only affects a single component (like toggling a menu),
+
+![alt text](image-4.png)
+
+The image provides an explanation of the two key **types of state** in React: **Local State** and **Global State**. Understanding the difference between these types of state helps in effectively managing data in React applications.
+
+### **Types of State: Local vs. Global**
+
+#### 1. **Local State**
+
+- **Definition**: 
+  Local state is state that is **needed only by one or a few components**. This state is defined within a component, and typically, only the component and its child components (if passed via props) have access to it. Local state is **internal** to the component and controls data that’s only relevant to that component or its immediate children.
+
+- **Characteristics**:
+  - It’s scoped to a specific component.
+  - Other components can’t directly access it unless it’s passed down via props.
+  - Used for **isolated interactions** like form inputs, toggling UI elements, etc.
+  
+- **Rule of Thumb**: 
+  "We should always start with local state" — this means it’s generally best to first implement state locally and then elevate it if needed by other parts of the application.
+
+#### Example of Local State:
+
+Let’s take the **search bar** from the example in the image. The search bar state (`searchQuery`) is local because:
+  - It’s only needed by the **SearchBar** component.
+  - The state manages what the user is typing in the search input and does not need to be shared across the app.
+
+```jsx
+import { useState } from 'react';
+
+function SearchBar() {
+  const [searchQuery, setSearchQuery] = useState(''); // Local state for the search input
+
+  return (
+    <input
+      type="text"
+      value={searchQuery}
+      onChange={e => setSearchQuery(e.target.value)}
+      placeholder="Search for courses..."
+    />
+  );
+}
+
+export default SearchBar;
+```
+
+In this example:
+- The `searchQuery` state only matters to the `SearchBar` component.
+- The state is updated with each keystroke, but it’s not shared outside of this component.
+- **Local State Example from the Image**: The search input field is the blue highlighted box labeled as **Local State** in the example, where users type a search query.
+
+---
+
+#### 2. **Global State**
+
+- **Definition**: 
+  Global state is **shared** state that **many components** across the application might need. It’s accessible to multiple components, no matter where they are located in the component tree.
+
+- **Characteristics**:
+  - It can be accessed by any component that subscribes to it.
+  - It is often stored in a **centralized place** using tools like **React Context** or **Redux**.
+  - It is useful for managing state that needs to be available across different parts of the app, such as user information, shopping cart data, app settings, or notifications.
+
+#### Example of Global State:
+
+In the example from the image, **the shopping cart** is labeled as global state. This state is likely used in multiple components across the app, such as:
+  - The **shopping cart icon** in the header (showing the number of items).
+  - The **checkout page** showing the total price.
+  - The **cart detail page** listing all the items in the cart.
+
+In this scenario, the shopping cart state needs to be **shared** across various components, so it would make sense to use a **global state management solution**, such as the **Context API** or **Redux**.
+
+#### Using React’s Context API for Global State:
+
+Here’s an example of how you might implement global state using the **Context API** to share the **shoppingCart** state across different components:
+
+```jsx
+import React, { createContext, useContext, useState } from 'react';
+
+// Create a Context for the global shoppingCart state
+const CartContext = createContext();
+
+// Create a provider component
+function CartProvider({ children }) {
+  const [shoppingCart, setShoppingCart] = useState([]);
+
+  return (
+    <CartContext.Provider value={{ shoppingCart, setShoppingCart }}>
+      {children}
+    </CartContext.Provider>
+  );
+}
+
+// Hook to use the cart context
+function useCart() {
+  return useContext(CartContext);
+}
+
+// Example usage in a component
+function CartIcon() {
+  const { shoppingCart } = useCart();
+  
+  return (
+    <div>
+      <span>{shoppingCart.length}</span> {/* Number of items in the cart */}
+    </div>
+  );
+}
+
+function AddToCartButton({ product }) {
+  const { shoppingCart, setShoppingCart } = useCart();
+
+  const addToCart = () => {
+    setShoppingCart([...shoppingCart, product]); // Add new item to the cart
+  };
+
+  return <button onClick={addToCart}>Add to Cart</button>;
+}
+
+function App() {
+  return (
+    <CartProvider>
+      <CartIcon />
+      <AddToCartButton product={{ name: "JavaScript Course", price: 12.99 }} />
+    </CartProvider>
+  );
+}
+
+export default App;
+```
+
+### How it Works:
+- **Global State**: The `shoppingCart` state is placed inside the `CartContext` and managed by the `CartProvider` component. This makes the `shoppingCart` state accessible to any component wrapped by the provider.
+- **Using Global State**: The `useCart` hook is used to access the global `shoppingCart` state. Both `CartIcon` (which shows the number of items) and `AddToCartButton` (which adds items to the cart) access the same shared state.
+- **Global State Example from the Image**: The shopping cart icon and cart page both access the same global `shoppingCart` state, allowing them to show the number of items in the cart and display the cart details, respectively.
+
+---
+
+### **When to Use Local State vs. Global State**
+
+#### **Use Local State** When:
+1. **State is used only by a specific component** or by that component’s children.
+2. The data doesn’t need to be shared outside of a single component or doesn’t affect other parts of the app.
+3. Example: **Input fields, dropdown toggles, form validation**, etc.
+
+#### **Use Global State** When:
+1. **Many components** need to access and share the same piece of state.
+2. You have **data that affects multiple components** across different parts of the app.
+3. Example: **User authentication, shopping cart, theme preferences, notifications**, etc.
+
+---
+
+### **Summary of Key Differences**
+
+| **Local State**                          | **Global State**                          |
+|------------------------------------------|-------------------------------------------|
+| Managed within a specific component.     | Shared across multiple components.        |
+| Accessible only within the component or passed to children via props. | Accessible to any component in the app using a global state management tool (like Context API or Redux). |
+| Used for isolated and component-specific interactions. | Used for data that needs to be available app-wide or in many parts of the app. |
+| Examples: Input fields, toggles, local form states. | Examples: User authentication, shopping cart, notifications, theme. |
+
+---
+
+### **Tools for Managing Global State**
+
+There are a couple of tools to manage global state in React:
+
+1. **React Context API**:
+   - Built-in API for managing global state in React.
+   - Ideal for smaller applications or scenarios where global state management is relatively simple.
+
+2. **Redux**:
+   - A more powerful state management library, ideal for larger and more complex applications.
+   - Centralizes all state into a **single store** and uses **reducers** to manage changes to the state.
+
+Both tools allow you to manage **shared global state** in a predictable way and make it accessible to any component that needs it.
+
+### Final Takeaway
+
+In most cases, **start with local state** and elevate to global state when it’s clear that multiple components need to share the same data. This makes your code simpler and avoids unnecessary complexity early on, while still allowing scalability as your app grows.
+
+![alt text](image-5.png)
+
+The image explains **when** and **where** to create and place state in a React application, using a flowchart to guide the decision-making process. The goal is to help developers decide if a piece of data should be stored as state, and where in the component tree that state should be managed. Let's break down the process step by step with examples.
+
+## **State: When and Where?**
+
+### **When to Create State**
+This section helps determine whether something needs to be stored as state and when it’s appropriate to create new state in a React component.
+
+1. **Do you need to store data?**
+   - **Yes**: If you need to track or store data, the next question is whether the data will change over time.
+   - **No**: If not, the data can be stored as a regular constant or variable.
+
+#### Example: Static Data
+```jsx
+function Header() {
+  const appName = "My React App"; // No need for state, as the data doesn't change.
+  return <h1>{appName}</h1>;
+}
+```
+
+Here, `appName` is a constant because it does not need to change. This would be a case where state is **not needed**.
+
+2. **Will the data change at some point?**
+   - **Yes**: If the data will change (e.g., user input, API data, etc.), proceed to the next decision point.
+   - **No**: If the data will remain constant, there's no need for state—use a regular constant or variable.
+
+3. **Can the data be computed from existing state/props?**
+   - **Yes**: If you can derive the data from existing state or props, there is no need for new state. Derived state should be calculated dynamically from other state/props instead of being stored separately.
+   - **No**: If the data cannot be computed from existing state or props, proceed to creating new state.
+
+#### Example: Derived State
+
+```jsx
+function FullName({ firstName, lastName }) {
+  const fullName = `${firstName} ${lastName}`; // Derived from props, no need for state.
+  return <p>{fullName}</p>;
+}
+```
+
+In this example, `fullName` is derived from props (`firstName` and `lastName`). There's no need to store `fullName` in state because it can be computed from the props.
+
+4. **Should the data trigger a re-render?**
+   - **Yes**: If the data should trigger a re-render when it changes (e.g., form inputs, animations), then create a new piece of state.
+   - **No**: If the data should not trigger a re-render, it can be stored using a `ref` (React’s `useRef` hook) instead of state.
+
+#### Example: Ref (Non-Rendering Data)
+
+```jsx
+import { useRef } from 'react';
+
+function FocusableInput() {
+  const inputRef = useRef(null); // Does not trigger a re-render
+  const focusInput = () => {
+    inputRef.current.focus(); // Accesses the DOM element without re-rendering
+  };
+
+  return (
+    <div>
+      <input ref={inputRef} />
+      <button onClick={focusInput}>Focus the input</button>
+    </div>
+  );
+}
+```
+
+In this example, `inputRef` holds a reference to the input DOM element but does not trigger a re-render. `useRef` is useful when you need to access elements or data without causing re-renders.
+
+---
+
+### **Where to Place State**
+Once you’ve determined that you need a piece of state, the next step is figuring out **where** to place that state within the component tree.
+
+1. **Is the state only used by this component?**
+   - **Yes**: If the state is only needed in the current component, leave it in that component as local state.
+   - **No**: If the state is shared with other components, continue to the next question.
+
+#### Example: Local State
+
+```jsx
+function Counter() {
+  const [count, setCount] = useState(0); // Local state, only used by this component
+
+  return (
+    <div>
+      <p>{count}</p>
+      <button onClick={() => setCount(count + 1)}>Increment</button>
+    </div>
+  );
+}
+```
+
+Here, the `count` state is only used by the `Counter` component, so it’s managed locally.
+
+2. **Is the state also used by a child component?**
+   - **Yes**: If a child component also needs access to the state, the parent should manage the state and pass it down to the child via props.
+   - **No**: If the state is not used by children, continue to the next question.
+
+#### Example: Passing State to a Child via Props
+
+```jsx
+function Parent() {
+  const [text, setText] = useState('Hello');
+
+  return <Child text={text} />; // Passing state as a prop to a child component
+}
+
+function Child({ text }) {
+  return <p>{text}</p>; // Child receives the state as a prop
+}
+```
+
+In this example, the parent component manages the `text` state and passes it down to the child component via props.
+
+3. **Is the state used by one or a few sibling components?**
+   - **Yes**: If the state is shared between sibling components, **lift the state up** to the first common parent so it can be shared between the siblings.
+   - **No**: If the state is not shared, continue with managing it locally.
+
+#### Example: Lifting State to a Common Parent
+
+```jsx
+function Parent() {
+  const [inputValue, setInputValue] = useState('');
+
+  return (
+    <div>
+      <InputField value={inputValue} onChange={setInputValue} />
+      <DisplayInput value={inputValue} />
+    </div>
+  );
+}
+
+function InputField({ value, onChange }) {
+  return (
+    <input
+      type="text"
+      value={value}
+      onChange={e => onChange(e.target.value)}
+    />
+  );
+}
+
+function DisplayInput({ value }) {
+  return <p>{value}</p>;
+}
+```
+
+Here:
+- The `inputValue` state is managed in the `Parent` component because it’s shared between two sibling components: `InputField` (for updating the input) and `DisplayInput` (for displaying the input).
+
+### **Final Step: Global State**
+- If the state is **used by many components**, and it becomes challenging to manage through props alone, you might need **global state** management. This can be handled using tools like the **Context API** or **Redux**.
+
+---
+
+### **Summary of Key Concepts**
+
+- **Always start with local state**: If the state is only needed in one component, manage it locally.
+- **Lift state up**: When sibling components need to share state, lift the state up to the nearest common parent.
+- **Use props** to pass state down from a parent to child components.
+- **Use global state** only if the state is used by many components across different areas of the app.
+
+### **Conclusion**
+This flowchart provides a structured way to think about **when to create state** and **where to place state** in a React application. By following this process, you can avoid state management pitfalls like redundant states, prop drilling, or unnecessary re-renders, leading to a cleaner, more maintainable React codebase.
+
+## 004 Thinking About State and Lifting State Up
+## 005 Reviewing Lifting Up State
+## 006 Deleting an Item More Child-to-Parent Communication!
+## 007 Updating an Item Complex Immutable Data Operation
+## 008 Derived State
+## 009 Calculating Statistics as Derived State
+## 010 Sorting Items
+## 011 Clearing the List
+## 012 Moving Components Into Separate Files
+## 013 EXERCISE #1 Accordion Component (v1)
+## 014 The children Prop Making a Reusable Button
+## 015 More Reusability With the children Prop
+## 016 EXERCISE #2 Accordion Component (v2)
+## 017 CHALLENGE #1 Tip Calculator
