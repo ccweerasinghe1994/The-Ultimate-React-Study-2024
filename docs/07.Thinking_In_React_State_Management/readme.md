@@ -1619,7 +1619,330 @@ export default App
 ```
 
 ## 008 Derived State
+
+![alt text](image-9.png)
+The image you’ve provided explains the concept of **deriving state** in React and shows why it’s better to avoid using separate state variables for data that can be computed from other existing state.
+
+Let's break it down:
+
+## **What is Derived State?**
+
+Derived state is **state that is computed** from existing state or props. Instead of storing multiple pieces of state that are dependent on each other, it’s more efficient to derive the state using calculations based on other state or props.
+
+### Example Scenario
+
+Suppose you're building a shopping cart, and you want to track:
+- The total number of items in the cart (`numItems`).
+- The total price of the items (`totalPrice`).
+- The actual cart items (`cart`).
+
+A **naive approach** would be to store `numItems` and `totalPrice` as separate pieces of state along with the `cart`. However, this causes unnecessary complexity, because `numItems` and `totalPrice` can be **derived** from the `cart` state itself.
+
+---
+
+### **Problems with Storing Separate State**
+
+If you store `cart`, `numItems`, and `totalPrice` as three separate state variables, this has several disadvantages:
+
+1. **Redundant State**: Both `numItems` and `totalPrice` can be derived from `cart`. Storing them as separate state introduces redundant data.
+  
+   ```jsx
+   const [cart, setCart] = useState([
+     { name: "JavaScript Course", price: 15.99 },
+     { name: "Node.js Bootcamp", price: 14.99 }
+   ]);
+
+   const [numItems, setNumItems] = useState(2); // Redundant, can be derived from cart.length
+   const [totalPrice, setTotalPrice] = useState(30.98); // Redundant, can be derived from cart items
+   ```
+
+2. **Synchronization Issues**: Now, whenever the `cart` is updated (e.g., an item is added or removed), you need to manually update `numItems` and `totalPrice`. Forgetting to update one of these values can lead to bugs where the data goes out of sync.
+
+   ```jsx
+   const handleAddItem = (newItem) => {
+     const updatedCart = [...cart, newItem];
+     setCart(updatedCart);
+     setNumItems(updatedCart.length); // Must update manually
+     setTotalPrice(updatedCart.reduce((acc, cur) => acc + cur.price, 0)); // Must update manually
+   };
+   ```
+
+3. **Performance Overhead**: Every time you update one of these states, React will re-render the component. If you are managing three separate pieces of state, you might cause three re-renders, leading to unnecessary performance overhead.
+
+---
+
+### **Solution: Deriving State**
+
+Instead of storing `numItems` and `totalPrice` as separate state variables, you can **derive them** from the `cart` state. This ensures that the `cart` is the **single source of truth**, and `numItems` and `totalPrice` can be calculated dynamically whenever the component re-renders.
+
+#### **How to Derive State**
+
+1. **Remove the `numItems` and `totalPrice` state**: Only keep the `cart` state.
+   ```jsx
+   const [cart, setCart] = useState([
+     { name: "JavaScript Course", price: 15.99 },
+     { name: "Node.js Bootcamp", price: 14.99 }
+   ]);
+   ```
+
+2. **Calculate `numItems` from `cart.length`**:
+   ```jsx
+   const numItems = cart.length;
+   ```
+
+3. **Calculate `totalPrice` by reducing over the cart array**:
+   ```jsx
+   const totalPrice = cart.reduce((acc, cur) => acc + cur.price, 0);
+   ```
+
+4. **Render the component using derived state**:
+   ```jsx
+   return (
+     <div>
+       <h2>Cart Summary</h2>
+       <p>Total Items: {numItems}</p>
+       <p>Total Price: ${totalPrice.toFixed(2)}</p>
+     </div>
+   );
+   ```
+
+This approach ensures that whenever the `cart` changes, `numItems` and `totalPrice` are automatically recalculated during the re-render, and you don’t have to manually keep them in sync.
+
+---
+
+### **Advantages of Derived State**
+
+1. **Single Source of Truth**:
+   - The `cart` is the **only** piece of state, making it easier to manage and maintain.
+   - You don’t have to worry about synchronizing multiple pieces of state, which reduces the chances of bugs.
+
+2. **Improved Performance**:
+   - React only needs to re-render the component when the `cart` changes, rather than re-rendering multiple times for `numItems` and `totalPrice`.
+
+3. **Cleaner Code**:
+   - Your code is more readable and simpler because you’re deriving the additional values instead of managing extra state.
+
+4. **Automatic Recalculation**:
+   - Since `numItems` and `totalPrice` are derived from `cart`, they are automatically recalculated whenever `cart` is updated, ensuring they are always accurate.
+
+---
+
+### **Final Code Example**
+
+Here’s the final, simplified version of the code using derived state:
+
+```jsx
+import { useState } from "react";
+
+function ShoppingCart() {
+  const [cart, setCart] = useState([
+    { name: "JavaScript Course", price: 15.99 },
+    { name: "Node.js Bootcamp", price: 14.99 }
+  ]);
+
+  const numItems = cart.length; // Derived state
+  const totalPrice = cart.reduce((acc, cur) => acc + cur.price, 0); // Derived state
+
+  const handleAddItem = () => {
+    const newItem = { name: "React Course", price: 19.99 };
+    setCart([...cart, newItem]);
+  };
+
+  return (
+    <div>
+      <h2>Cart Summary</h2>
+      <p>Total Items: {numItems}</p>
+      <p>Total Price: ${totalPrice.toFixed(2)}</p>
+      <button onClick={handleAddItem}>Add Item</button>
+    </div>
+  );
+}
+
+export default ShoppingCart;
+```
+
+### Summary:
+
+- **Don’t store redundant state** that can be computed from existing state or props.
+- **Derive state** to keep your code simpler, avoid synchronization issues, and improve performance.
+- Use derived variables, calculated on each render, to ensure your data stays consistent with the main source of truth.
+
+By **deriving state** from your `cart`, you reduce complexity and avoid the pitfalls of managing redundant or dependent state.
 ## 009 Calculating Statistics as Derived State
+
+```tsx
+import {FC, FormEvent, useState} from "react";
+
+type Item = {
+    id: number;
+    description: string;
+    quantity: number;
+    packed: boolean;
+};
+
+
+type PropsItem = {
+    item: Item;
+    onDelete: (id: number) => void;
+    onChange: (id: number) => void;
+};
+
+
+type PropsForm = {
+    onAddItem: (item: Item) => void;
+}
+
+type PropsPackagingList = {
+    items: Item[];
+    onDelete: (id: number) => void;
+    onChange: (id: number) => void;
+
+}
+
+type PropsStats = {
+    items: Item[]
+}
+
+
+function App() {
+
+    const [items, setItems] = useState<Item[]>([]);
+
+    const handleAddItem = (item: Item) => {
+        setItems([...items, item]);
+    }
+    const handleDeleteItem = (id: number) => {
+        setItems(items.filter(item => item.id !== id));
+    }
+
+    const handleItemChange = (id: number) => {
+        setItems(items.map(item => {
+            if (item.id === id) {
+                return {
+                    ...item,
+                    packed: !item.packed
+                }
+            }
+            return item;
+        }))
+    };
+
+    return (
+        <div className={'app'}>
+            <Logo/>
+            <Form onAddItem={handleAddItem}/>
+            <PackingList onDelete={handleDeleteItem} items={items} onChange={handleItemChange}/>
+            <Stats items={items}/>
+        </div>
+    )
+}
+
+const Logo = () => {
+    return (
+        <h1> 🌴 Far Away 💼</h1>
+    )
+};
+
+const Form: FC<PropsForm> = ({onAddItem}) => {
+
+    const [description, setDescription] = useState<string>('');
+    const [quantity, setQuantity] = useState<number>(1);
+
+
+    const reset = () => {
+        setDescription('');
+        setQuantity(1);
+    };
+
+    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        if (!description) return;
+
+        const newItem: Item = {
+            id: new Date().getTime(),
+            description,
+            quantity,
+            packed: false
+        }
+
+        onAddItem(newItem);
+        reset();
+
+    }
+
+    const handleChange = (e: FormEvent<HTMLInputElement>) => {
+        setDescription(e.currentTarget.value);
+    }
+
+    return (
+        <form onSubmit={handleSubmit} className={'add-form'}>
+            <h3>What is you need for your trip ?</h3>
+            <select value={quantity} onChange={event => setQuantity(+event.target.value)}>
+                {
+                    Array.from({length: 20}, (_, i) => (
+                        <option key={i + 1} value={i + 1}>{i + 1}</option>
+                    ))
+                }
+            </select>
+            <input type="text" placeholder={"type a item here"} value={description} onChange={handleChange}/>
+            <button>add</button>
+        </form>
+    )
+};
+
+
+const PackingList: FC<PropsPackagingList> = ({items, onDelete, onChange}) => {
+    return (
+        <div className={'list'}>
+            <ul>
+                {items.map(item => <Item onDelete={onDelete} key={item.id} item={item} onChange={onChange}/>)}
+            </ul>
+        </div>
+    )
+};
+
+
+const Item: FC<PropsItem> = ({item, onDelete, onChange}) => {
+    return (
+        <li>
+            <input type="checkbox" value={item.packed.toString()} onChange={() => onChange(item.id)}/>
+            <span style={item.packed ? {textDecoration: 'line-through'} : {}}>
+            {item.quantity} {item.description}
+            </span>
+            <button onClick={() => onDelete(item.id)}>❌</button>
+        </li>
+    )
+}
+
+
+const Stats: FC<PropsStats> = ({items}) => {
+
+    if (!items.length) {
+        return <footer className={'stats'}>Start adding items to your packing list 😊 </footer>
+    }
+
+    const totalItems = items.length;
+    const pickedItems = items.filter(item => item.packed).length;
+    const percentage = (pickedItems / totalItems) * 100;
+    const completeMessage = "You are ready to go! ✈️";
+    const incompleteMessage = `You Have ${totalItems} items on your list, and you already packed ${pickedItems}(${percentage}%)`
+    return (
+        <footer className={'stats'}>
+            <em>
+                {
+                    percentage === 100 ? completeMessage : incompleteMessage
+                }
+            </em>
+        </footer>
+    )
+};
+
+
+export default App
+
+```
+
 ## 010 Sorting Items
 ## 011 Clearing the List
 ## 012 Moving Components Into Separate Files

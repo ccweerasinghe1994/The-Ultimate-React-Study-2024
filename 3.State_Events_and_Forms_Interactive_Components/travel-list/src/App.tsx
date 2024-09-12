@@ -26,6 +26,10 @@ type PropsPackagingList = {
 
 }
 
+type PropsStats = {
+    items: Item[]
+}
+
 
 function App() {
 
@@ -55,7 +59,7 @@ function App() {
             <Logo/>
             <Form onAddItem={handleAddItem}/>
             <PackingList onDelete={handleDeleteItem} items={items} onChange={handleItemChange}/>
-            <Stats/>
+            <Stats items={items}/>
         </div>
     )
 }
@@ -139,11 +143,23 @@ const Item: FC<PropsItem> = ({item, onDelete, onChange}) => {
 }
 
 
-const Stats = () => {
+const Stats: FC<PropsStats> = ({items}) => {
+
+    if (!items.length) {
+        return <footer className={'stats'}>Start adding items to your packing list 😊 </footer>
+    }
+
+    const totalItems = items.length;
+    const pickedItems = items.filter(item => item.packed).length;
+    const percentage = (pickedItems / totalItems) * 100;
+    const completeMessage = "You are ready to go! ✈️";
+    const incompleteMessage = `You Have ${totalItems} items on your list, and you already packed ${pickedItems}(${percentage}%)`
     return (
         <footer className={'stats'}>
             <em>
-                You Have X items on your list, and you already packed X
+                {
+                    percentage === 100 ? completeMessage : incompleteMessage
+                }
             </em>
         </footer>
     )
