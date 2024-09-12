@@ -2164,7 +2164,177 @@ This app demonstrates the use of **state management**, **props** for communicati
 - **Deleting items**: The user can remove items from the list by clicking the delete button.
 - **Displaying stats**: The app displays a summary of packed and unpacked items, including the percentage of packed items.
 ## 010 Sorting Items
+
+```tsx
+const PackingList: FC<PropsPackagingList> = ({items, onDelete, onChange}) => {
+
+    const [sortBy, setSortBy] = useState<string>('input');
+
+    let sortedItems: Item[] = [...items];
+
+    if (sortBy === 'description') {
+        sortedItems.sort((a, b) => a.description.localeCompare(b.description))
+    }
+
+    if (sortBy === 'unpacked') {
+        sortedItems.sort((a, b) => Number(b.packed) - Number(a.packed))
+    }
+
+    if (sortBy === 'input') {
+        sortedItems = items;
+    }
+
+
+    return (
+        <div className={'list'}>
+            <ul>
+                {sortedItems.map(item => <Item onDelete={onDelete} key={item.id} item={item} onChange={onChange}/>)}
+            </ul>
+            <div className="actions">
+                <select name="" id="" value={sortBy} onChange={e => setSortBy(e.target.value)}>
+                    <option value="input">input</option>
+                    <option value="description">description</option>
+                    <option value="unpacked">unpacked</option>
+                </select>
+            </div>
+        </div>
+    )
+};
+```
+In this updated `PackingList` component, you've added functionality to allow sorting the list of items based on different criteria. This gives the user the flexibility to view the items either in their input order, sorted alphabetically by description, or sorted by whether they are packed or unpacked.
+
+Let's break down how this implementation works and explain each section of the code.
+
+### **State Management**
+
+```tsx
+const [sortBy, setSortBy] = useState<string>('input');
+```
+
+- `sortBy`: This state variable holds the current sorting criterion. It can be one of three values: `'input'`, `'description'`, or `'unpacked'`.
+  - `'input'`: Represents the order in which the items were added.
+  - `'description'`: Represents sorting by the item's description (alphabetically).
+  - `'unpacked'`: Represents sorting by the packed status, with unpacked items displayed first.
+
+The `setSortBy` function is used to update the sorting state when the user selects a different sorting option from the dropdown.
+
+### **Sorting Logic**
+
+The items are sorted based on the `sortBy` state variable. 
+
+```tsx
+let sortedItems: Item[] = [...items]; // Create a copy of the items array to sort
+```
+
+A copy of the `items` array is made so that the original state isn't mutated during sorting.
+
+1. **Sort by Description (Alphabetically)**:
+   
+   ```tsx
+   if (sortBy === 'description') {
+       sortedItems.sort((a, b) => a.description.localeCompare(b.description))
+   }
+   ```
+
+   If the selected sorting method is `'description'`, the `localeCompare` function is used to compare and sort the items alphabetically by their `description`.
+
+2. **Sort by Packed/Unpacked**:
+
+   ```tsx
+   if (sortBy === 'unpacked') {
+       sortedItems.sort((a, b) => Number(b.packed) - Number(a.packed))
+   }
+   ```
+
+   Here, the items are sorted based on their `packed` status. `Number(b.packed) - Number(a.packed)` sorts items so that unpacked ones (`packed: false`, which is converted to `0`) appear before packed ones (`packed: true`, which is converted to `1`).
+
+3. **Sort by Input Order**:
+
+   ```tsx
+   if (sortBy === 'input') {
+       sortedItems = items; // Reset to original order if 'input' is selected
+   }
+   ```
+
+   If the user chooses `'input'`, the items are displayed in their original input order, so the `sortedItems` array is reset to the original `items` array.
+
+### **Rendering the Items**
+
+```tsx
+<ul>
+    {sortedItems.map(item => <Item onDelete={onDelete} key={item.id} item={item} onChange={onChange}/>)}
+</ul>
+```
+
+The `sortedItems` array is mapped over to render each `Item` in the list. The `onDelete` and `onChange` functions are passed down as props, allowing each item to be deleted or toggled between packed and unpacked.
+
+### **Sort Selector (Dropdown)**
+
+```tsx
+<div className="actions">
+    <select name="" id="" value={sortBy} onChange={e => setSortBy(e.target.value)}>
+        <option value="input">input</option>
+        <option value="description">description</option>
+        <option value="unpacked">unpacked</option>
+    </select>
+</div>
+```
+
+The `select` element provides three options for sorting: `'input'`, `'description'`, and `'unpacked'`. The current sorting method (`sortBy`) is controlled by this dropdown. When the user changes the value, the `onChange` event is triggered, and `setSortBy` updates the state to the selected value.
+
+### **Full PackingList Component Code**
+
+Here's the full code in context:
+
+```tsx
+const PackingList: FC<PropsPackagingList> = ({items, onDelete, onChange}) => {
+
+    const [sortBy, setSortBy] = useState<string>('input');
+
+    let sortedItems: Item[] = [...items];
+
+    if (sortBy === 'description') {
+        sortedItems.sort((a, b) => a.description.localeCompare(b.description))
+    }
+
+    if (sortBy === 'unpacked') {
+        sortedItems.sort((a, b) => Number(b.packed) - Number(a.packed))
+    }
+
+    if (sortBy === 'input') {
+        sortedItems = items;
+    }
+
+    return (
+        <div className={'list'}>
+            <ul>
+                {sortedItems.map(item => <Item onDelete={onDelete} key={item.id} item={item} onChange={onChange}/>)}
+            </ul>
+            <div className="actions">
+                <select value={sortBy} onChange={e => setSortBy(e.target.value)}>
+                    <option value="input">input</option>
+                    <option value="description">description</option>
+                    <option value="unpacked">unpacked</option>
+                </select>
+            </div>
+        </div>
+    );
+};
+```
+
+### **Summary**
+
+- **State**: `sortBy` determines the sorting method: `'input'`, `'description'`, or `'unpacked'`.
+- **Sorting Logic**: The items are sorted based on the `sortBy` value. The sorting can be:
+  - Original input order (`'input'`).
+  - Alphabetical order by description (`'description'`).
+  - Packed/unpacked status (`'unpacked'`).
+- **Rendering**: Items are displayed in the order dictated by the current sorting method.
+
+This component provides a great example of how to implement **sorting functionality** in a React application using local state and user interactions.
 ## 011 Clearing the List
+
+
 ## 012 Moving Components Into Separate Files
 ## 013 EXERCISE #1 Accordion Component (v1)
 ## 014 The children Prop Making a Reusable Button
