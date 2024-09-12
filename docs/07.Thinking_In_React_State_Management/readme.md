@@ -2598,6 +2598,139 @@ export default App
 
 ```
 ## 013 EXERCISE #1 Accordion Component (v1)
+
+```tsx
+import {useState} from "react";
+import Logo from "./Logo.tsx";
+import Stats from "./Stats.tsx";
+import PackingList from "./PackageList.tsx";
+import Form from "./Form.tsx";
+
+export type TItem = {
+    id: number;
+    description: string;
+    quantity: number;
+    packed: boolean;
+};
+
+
+function App() {
+
+    const [items, setItems] = useState<TItem[]>([]);
+
+    const handleAddItem = (item: TItem) => {
+        setItems([...items, item]);
+    }
+    const handleDeleteItem = (id: number) => {
+        setItems(items.filter(item => item.id !== id));
+    }
+
+    const handleItemChange = (id: number) => {
+        setItems(items.map(item => {
+            if (item.id === id) {
+                return {
+                    ...item,
+                    packed: !item.packed
+                }
+            }
+            return item;
+        }))
+    };
+    const onClearPackingList = () => {
+        setItems([]);
+    }
+    return (
+        <div className={'app'}>
+            <Logo/>
+            <Form onAddItem={handleAddItem}/>
+            <PackingList handleClearPackingList={onClearPackingList} onDelete={handleDeleteItem} items={items}
+                         onChange={handleItemChange}/>
+            <Stats items={items}/>
+        </div>
+    )
+}
+
+
+export default App
+
+```
+```css
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: sans-serif;
+  color: #343a40;
+  line-height: 1;
+}
+
+.accordion {
+  width: 700px;
+  margin: 100px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.item {
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+  padding: 20px 24px;
+  padding-right: 48px;
+  cursor: pointer;
+  border-top: 4px solid #fff;
+  border-bottom: 4px solid #fff;
+
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  column-gap: 24px;
+  row-gap: 32px;
+  align-items: center;
+}
+
+.number {
+  font-size: 24px;
+  font-weight: 500;
+  color: #ced4da;
+}
+
+.title,
+.icon {
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.content-box {
+  grid-column: 2 / -1;
+  padding-bottom: 16px;
+  line-height: 1.6;
+}
+
+.content-box ul {
+  color: #868e96;
+  margin-left: 16px;
+  margin-top: 16px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* OPEN STATE */
+.open {
+  border-top: 4px solid #087f5b;
+}
+
+.open .number,
+.open .text {
+  color: #087f5b;
+}
+
+```
+
+
 ## 014 The children Prop Making a Reusable Button
 ## 015 More Reusability With the children Prop
 ## 016 EXERCISE #2 Accordion Component (v2)
