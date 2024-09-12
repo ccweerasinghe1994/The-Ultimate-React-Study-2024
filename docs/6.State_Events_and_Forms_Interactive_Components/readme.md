@@ -2004,6 +2004,10 @@ function TodoList() {
 
 By using the functional form of state updates, you can ensure that your React applications behave predictably and avoid issues caused by stale or outdated state values.
 ## 11. More Thoughts About State + State Guidelines
+
+![alt text](image-7.png)
+![alt text](image-8.png)
+![alt text](image-9.png)
 ## 12. A Vanilla JavaScript Implementation
 ## 13. CHALLENGE #1 Date Counter (v1)
 ## 14. Starting a New Project The Far Away Travel List
