@@ -815,8 +815,650 @@ Here:
 This flowchart provides a structured way to think about **when to create state** and **where to place state** in a React application. By following this process, you can avoid state management pitfalls like redundant states, prop drilling, or unnecessary re-renders, leading to a cleaner, more maintainable React codebase.
 
 ## 004 Thinking About State and Lifting State Up
+
+```tsx
+import {FC, FormEvent, useState} from "react";
+
+type Item = {
+    id: number;
+    description: string;
+    quantity: number;
+    packed: boolean;
+};
+
+
+type PropsItem = {
+    item: Item;
+};
+
+
+type PropsForm = {
+    onAddItem: (item: Item) => void;
+}
+
+type PropsPackagingList = {
+    items: Item[];
+
+}
+
+
+function App() {
+
+    const [items, setItems] = useState<Item[]>([]);
+
+    const handleAddItem = (item: Item) => {
+        setItems([...items, item]);
+    }
+
+    return (
+        <div className={'app'}>
+            <Logo/>
+            <Form onAddItem={handleAddItem}/>
+            <PackingList items={items}/>
+            <Stats/>
+        </div>
+    )
+}
+
+const Logo = () => {
+    return (
+        <h1> 🌴 Far Away 💼</h1>
+    )
+};
+
+const Form: FC<PropsForm> = ({onAddItem}) => {
+
+    const [description, setDescription] = useState<string>('');
+    const [quantity, setQuantity] = useState<number>(1);
+
+
+    const reset = () => {
+        setDescription('');
+        setQuantity(1);
+    };
+
+    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        if (!description) return;
+
+        const newItem: Item = {
+            id: new Date().getTime(),
+            description,
+            quantity,
+            packed: false
+        }
+
+        onAddItem(newItem);
+        reset();
+
+    }
+
+    const handleChange = (e: FormEvent<HTMLInputElement>) => {
+        setDescription(e.currentTarget.value);
+    }
+
+    return (
+        <form onSubmit={handleSubmit} className={'add-form'}>
+            <h3>What is you need for your trip ?</h3>
+            <select value={quantity} onChange={event => setQuantity(+event.target.value)}>
+                {
+                    Array.from({length: 20}, (_, i) => (
+                        <option key={i + 1} value={i + 1}>{i + 1}</option>
+                    ))
+                }
+            </select>
+            <input type="text" placeholder={"type a item here"} value={description} onChange={handleChange}/>
+            <button>add</button>
+        </form>
+    )
+};
+
+
+const PackingList: FC<PropsPackagingList> = ({items}) => {
+    return (
+        <div className={'list'}>
+            <ul>
+                {items.map(item => <Item key={item.id} item={item}/>)}
+            </ul>
+        </div>
+    )
+};
+
+
+const Item: FC<PropsItem> = ({item}) => {
+    return (
+        <li>
+            <span style={item.packed ? {textDecoration: 'line-through'} : {}}>
+            {item.quantity} {item.description}
+            </span>
+            <button>❌</button>
+        </li>
+    )
+}
+
+
+const Stats = () => {
+    return (
+        <footer className={'stats'}>
+            <em>
+                You Have X items on your list, and you already packed X
+            </em>
+        </footer>
+    )
+};
+
+
+export default App
+
+```
+The code you provided represents a simple **React** application for a packing list app, and the output image shows the visual representation of the app. This app allows users to add items they need for a trip, including the quantity of each item, and displays them in a list where items can be checked off once packed. Let’s break down the app's components and how they work, along with a deeper explanation.
+
+## **Key Components of the App**
+
+1. **App Component**:
+   The `App` component is the parent component that manages the entire packing list application. It holds the `items` state and passes functions and props down to child components to handle adding items and rendering the list.
+
+   - **State**: 
+     ```tsx
+     const [items, setItems] = useState<Item[]>([]);
+     ```
+     The `items` state holds an array of objects where each object is an item the user adds to their packing list. Each item consists of the following:
+     - `id`: A unique identifier for each item.
+     - `description`: The name of the item (what the user types into the input field).
+     - `quantity`: How many of the item the user needs.
+     - `packed`: A boolean representing whether the item has been packed or not.
+
+   - **handleAddItem**: 
+     This function updates the state with a new item when it’s submitted in the form.
+     ```tsx
+     const handleAddItem = (item: Item) => {
+         setItems([...items, item]);
+     };
+     ```
+
+   - **Components used**: 
+     The `App` component renders several child components:
+     - `Logo` for displaying the header.
+     - `Form` for adding new items.
+     - `PackingList` for displaying the list of items.
+     - `Stats` for showing statistics about the number of items packed vs. total items.
+
+---
+
+2. **Logo Component**:
+   The `Logo` component is a simple functional component that renders the title "Far Away" with decorative emojis. It does not take any props or manage state.
+   
+   ```tsx
+   const Logo = () => {
+       return (
+           <h1> 🌴 Far Away 💼</h1>
+       );
+   };
+   ```
+
+---
+
+3. **Form Component**:
+   The `Form` component is responsible for capturing user input (the item description and quantity) and then submitting it to add to the packing list.
+
+   - **State**: 
+     The form manages two pieces of local state:
+     ```tsx
+     const [description, setDescription] = useState<string>('');
+     const [quantity, setQuantity] = useState<number>(1);
+     ```
+     - `description` stores the user input for the item’s description.
+     - `quantity` stores the number of items the user wants to add.
+
+   - **handleSubmit**: 
+     This function is triggered when the form is submitted. It checks if a description is provided, creates a new item, and calls the `onAddItem` prop passed from the parent (`App`) to add the item to the list.
+
+     ```tsx
+     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+         e.preventDefault();
+         if (!description) return;
+
+         const newItem: Item = {
+             id: new Date().getTime(),
+             description,
+             quantity,
+             packed: false
+         };
+
+         onAddItem(newItem);
+         reset();
+     };
+     ```
+
+   - **reset**: 
+     Resets the form fields after the item is added.
+
+   - **handleChange**: 
+     Updates the `description` state whenever the user types into the input field.
+
+     ```tsx
+     const handleChange = (e: FormEvent<HTMLInputElement>) => {
+         setDescription(e.currentTarget.value);
+     };
+     ```
+
+   The form component also includes:
+   - A dropdown (`select`) to choose the item quantity.
+   - An input field for entering the item’s description.
+   - A submit button to add the item to the list.
+
+   ```tsx
+   <select value={quantity} onChange={event => setQuantity(+event.target.value)}>
+       {Array.from({ length: 20 }, (_, i) => (
+           <option key={i + 1} value={i + 1}>{i + 1}</option>
+       ))}
+   </select>
+   <input type="text" placeholder="type a item here" value={description} onChange={handleChange} />
+   ```
+
+---
+
+4. **PackingList Component**:
+   The `PackingList` component is responsible for rendering the list of items that have been added. It receives the `items` array as a prop from the `App` component and maps through the items to render each `Item` component.
+
+   ```tsx
+   const PackingList: FC<PropsPackagingList> = ({ items }) => {
+       return (
+           <div className={'list'}>
+               <ul>
+                   {items.map(item => <Item key={item.id} item={item} />)}
+               </ul>
+           </div>
+       );
+   };
+   ```
+
+---
+
+5. **Item Component**:
+   Each individual item in the list is represented by the `Item` component. It displays the item’s quantity and description, and includes a button to remove the item (although the delete functionality is not yet implemented).
+
+   - **Styling**: 
+     The item is struck through if it is marked as `packed`. This is controlled by applying a `textDecoration: 'line-through'` style when the item is packed.
+     
+     ```tsx
+     <span style={item.packed ? { textDecoration: 'line-through' } : {}}>
+         {item.quantity} {item.description}
+     </span>
+     ```
+
+   - **Remove Button**: 
+     A ❌ button is included next to each item, but currently, it doesn't have functionality to remove the item.
+
+---
+
+6. **Stats Component**:
+   The `Stats` component is responsible for displaying the number of items in the list and how many of them have been packed. In the current code, the stats are static and display "You Have X items on your list, and you already packed X." 
+
+   This can later be made dynamic by counting the total items and the packed items from the `items` array.
+
+   ```tsx
+   const Stats = () => {
+       return (
+           <footer className={'stats'}>
+               <em>
+                   You Have X items on your list, and you already packed X
+               </em>
+           </footer>
+       );
+   };
+   ```
+
+---
+
+## **How the Application Works**
+
+1. **Adding Items**:
+   - The user selects the **quantity** and types a **description** of the item they want to add using the form.
+   - Upon clicking the "Add" button (submitting the form), the item is added to the packing list and displayed in the `PackingList` component.
+
+2. **Displaying Items**:
+   - The `PackingList` component maps over the `items` array and renders an `Item` component for each item.
+   - Each item shows the **quantity** and **description**, and a ❌ button (though it’s not functional yet).
+
+3. **Tracking Stats**:
+   - The `Stats` component (though currently static) is intended to show how many items are on the list and how many have been packed.
+
+## **Suggested Improvements and Additional Features**
+
+1. **Toggle Packed Status**:
+   - Allow users to mark items as packed by clicking on them or checking a checkbox. Update the `Item` component to include a checkbox that toggles the `packed` status of each item.
+
+   ```tsx
+   const togglePacked = (id: number) => {
+       setItems(items.map(item => 
+           item.id === id ? { ...item, packed: !item.packed } : item
+       ));
+   };
+   ```
+
+2. **Remove Item from List**:
+   - Implement the functionality for the ❌ button to remove items from the list by filtering them out from the `items` array.
+
+   ```tsx
+   const removeItem = (id: number) => {
+       setItems(items.filter(item => item.id !== id));
+   };
+   ```
+
+3. **Dynamic Stats**:
+   - Calculate and display the total number of items and the number of packed items dynamically.
+
+   ```tsx
+   const totalItems = items.length;
+   const packedItems = items.filter(item => item.packed).length;
+   ```
+
+   The `Stats` component can use this to display meaningful information:
+   
+   ```tsx
+   <em>
+       You Have {totalItems} items on your list, and you already packed {packedItems}
+   </em>
+   ```
+
+4. **Input Validation**:
+   - Add input validation to ensure that the description is not empty or duplicated.
+
+5. **LocalStorage Persistence**:
+   - Store the `items` in `localStorage` so that the packing list persists even when the page is refreshed.
+
+## **Conclusion**
+
+This packing list app demonstrates the use of React’s **state management**, **event handling**, and **component-based architecture**. Users can add items dynamically to the list, and with further improvements, the app could include features like marking items as packed, removing items, and calculating statistics dynamically.
 ## 005 Reviewing Lifting Up State
+
+![alt text](image-6.png)
+![alt text](image-7.png)
+![alt text](image-8.png)
+
+The three images illustrate a common **problem** in React applications — **sharing state between sibling components** — and two key solutions: **lifting state up** and **child-to-parent communication**. Let’s go step by step to explain this concept in detail with examples.
+
+## **Problem: Sharing State with Sibling Components**
+
+In React, data flows in **one direction**: from parent to child components. This is called **one-way data flow**. However, this presents a challenge when sibling components need to share state. 
+
+### Scenario:
+- You have two sibling components: **Total** and **Promotions**.
+- Both components need access to the same piece of state, in this case, the `coupons` state. The **Total** component needs to know about the applied coupon to calculate the final price, and the **Promotions** component is where users enter the coupon.
+  
+But, React’s one-way data flow means **data cannot flow directly between sibling components**. Therefore, you cannot directly pass `coupons` from **Promotions** to **Total** or vice versa. The **coupons** state must flow from a **parent** component.
+
+---
+
+## **Solution: Lifting State Up**
+
+### What Does It Mean to "Lift State Up"?
+When multiple components need to access the same piece of state, you **"lift the state up"** to the nearest common parent component. In this case, the `coupons` state is **lifted up** to the parent component (**Checkout**), and then it is passed down as **props** to both **Total** and **Promotions**.
+
+### How It Works:
+1. **Checkout Component**:
+   The `coupons` state is managed in the **Checkout** component, which is the **common parent** of **Total** and **Promotions**.
+   
+   ```jsx
+   function Checkout() {
+     const [coupons, setCoupons] = useState(''); // Lifting state to the parent
+
+     return (
+       <div>
+         <Total coupons={coupons} />
+         <Promotions coupons={coupons} setCoupons={setCoupons} />
+       </div>
+     );
+   }
+   ```
+
+   - **`coupons`** is lifted up to **Checkout** and passed down to both child components as props.
+   - **Total** receives `coupons` to use it for calculating the total price.
+   - **Promotions** receives both `coupons` and `setCoupons` to manage and apply a new coupon.
+
+2. **Total Component**:
+   The **Total** component now receives `coupons` as a prop from its parent, **Checkout**.
+
+   ```jsx
+   function Total({ coupons }) {
+     const totalPrice = 100; // Assume a base price
+     const discount = coupons === 'DISCOUNT50' ? 0.5 : 1; // Apply discount based on coupon
+
+     return <div>Total: €{totalPrice * discount}</div>;
+   }
+   ```
+
+   - The **Total** component applies the `coupons` prop to adjust the total price.
+   - If the coupon code is `'DISCOUNT50'`, a 50% discount is applied.
+
+3. **Promotions Component**:
+   The **Promotions** component allows the user to input a coupon code and update the `coupons` state in the parent (via `setCoupons`).
+
+   ```jsx
+   function Promotions({ coupons, setCoupons }) {
+     const applyCoupon = () => {
+       setCoupons('DISCOUNT50'); // Apply coupon and update state in parent
+     };
+
+     return (
+       <div>
+         <input type="text" placeholder="Enter Coupon" />
+         <button onClick={applyCoupon}>Apply</button>
+       </div>
+     );
+   }
+   ```
+
+   - **Promotions** can update the `coupons` state in **Checkout** using the `setCoupons` function passed from the parent.
+   - When the user clicks the "Apply" button, the coupon is applied and shared between both **Promotions** and **Total** components.
+
+### The Key Idea:
+- By lifting the `coupons` state up to the **Checkout** parent component, it can now be shared across both sibling components, **Total** and **Promotions**.
+- **State is lifted up** to the closest common ancestor of the components that need to share it.
+
+---
+
+## **Child-to-Parent Communication**
+
+In React, data flows from **parent to child** through **props**. But, what if a **child component** needs to update the parent’s state? This is called **child-to-parent communication**, and it is achieved by passing **callback functions** as props.
+
+### How Child-to-Parent Communication Works:
+1. **The parent component (Checkout)** passes a callback function (`setCoupons`) down to the child component (**Promotions**).
+2. **The child component (Promotions)** calls this function to update the state in the parent.
+
+### Example:
+
+```jsx
+function Checkout() {
+  const [coupons, setCoupons] = useState(''); // Parent state
+
+  return (
+    <div>
+      <Total coupons={coupons} />
+      <Promotions coupons={coupons} setCoupons={setCoupons} /> {/* Passing setCoupons to child */}
+    </div>
+  );
+}
+
+function Promotions({ setCoupons }) {
+  const applyCoupon = () => {
+    setCoupons('DISCOUNT50'); // Updating parent's state from the child
+  };
+
+  return (
+    <div>
+      <input type="text" placeholder="Enter Coupon" />
+      <button onClick={applyCoupon}>Apply</button>
+    </div>
+  );
+}
+```
+
+Here’s how this communication works:
+1. The **Promotions** component receives `setCoupons` as a prop.
+2. When the user clicks the "Apply" button, `setCoupons` is called, updating the parent’s `coupons` state.
+3. The updated `coupons` state is then passed down to both **Total** and **Promotions**, ensuring both components receive the updated coupon code.
+
+---
+
+## **Summary of Key Points**
+
+1. **Problem: Sharing State Between Siblings**:
+   - In React, data flows **one way** from parent to child. You cannot directly share state between sibling components.
+   
+2. **Solution: Lifting State Up**:
+   - To share state between siblings, **lift the state up** to their common parent.
+   - The parent manages the state and passes it down to the children via props.
+
+3. **Child-to-Parent Communication**:
+   - If a child needs to update the parent's state, the parent passes a **callback function** (like `setCoupons`) to the child.
+   - The child calls the function to update the parent’s state.
+
+By applying these concepts, you can solve the common issue of sharing state between sibling components in React while maintaining the integrity of React's one-way data flow. This approach keeps the data flow predictable and makes it easier to track how state changes propagate through the component tree.
 ## 006 Deleting an Item More Child-to-Parent Communication!
+
+```tsx
+import {FC, FormEvent, useState} from "react";
+
+type Item = {
+    id: number;
+    description: string;
+    quantity: number;
+    packed: boolean;
+};
+
+
+type PropsItem = {
+    item: Item;
+    onDelete: (id: number) => void;
+};
+
+
+type PropsForm = {
+    onAddItem: (item: Item) => void;
+}
+
+type PropsPackagingList = {
+    items: Item[];
+    onDelete: (id: number) => void;
+
+}
+
+
+function App() {
+
+    const [items, setItems] = useState<Item[]>([]);
+
+    const handleAddItem = (item: Item) => {
+        setItems([...items, item]);
+    }
+    const handleDeleteItem = (id: number) => {
+        setItems(items.filter(item => item.id !== id));
+    }
+    return (
+        <div className={'app'}>
+            <Logo/>
+            <Form onAddItem={handleAddItem}/>
+            <PackingList onDelete={handleDeleteItem} items={items}/>
+            <Stats/>
+        </div>
+    )
+}
+
+const Logo = () => {
+    return (
+        <h1> 🌴 Far Away 💼</h1>
+    )
+};
+
+const Form: FC<PropsForm> = ({onAddItem}) => {
+
+    const [description, setDescription] = useState<string>('');
+    const [quantity, setQuantity] = useState<number>(1);
+
+
+    const reset = () => {
+        setDescription('');
+        setQuantity(1);
+    };
+
+    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        if (!description) return;
+
+        const newItem: Item = {
+            id: new Date().getTime(),
+            description,
+            quantity,
+            packed: false
+        }
+
+        onAddItem(newItem);
+        reset();
+
+    }
+
+    const handleChange = (e: FormEvent<HTMLInputElement>) => {
+        setDescription(e.currentTarget.value);
+    }
+
+    return (
+        <form onSubmit={handleSubmit} className={'add-form'}>
+            <h3>What is you need for your trip ?</h3>
+            <select value={quantity} onChange={event => setQuantity(+event.target.value)}>
+                {
+                    Array.from({length: 20}, (_, i) => (
+                        <option key={i + 1} value={i + 1}>{i + 1}</option>
+                    ))
+                }
+            </select>
+            <input type="text" placeholder={"type a item here"} value={description} onChange={handleChange}/>
+            <button>add</button>
+        </form>
+    )
+};
+
+
+const PackingList: FC<PropsPackagingList> = ({items, onDelete}) => {
+    return (
+        <div className={'list'}>
+            <ul>
+                {items.map(item => <Item onDelete={onDelete} key={item.id} item={item}/>)}
+            </ul>
+        </div>
+    )
+};
+
+
+const Item: FC<PropsItem> = ({item, onDelete}) => {
+    return (
+        <li>
+            <span style={item.packed ? {textDecoration: 'line-through'} : {}}>
+            {item.quantity} {item.description}
+            </span>
+            <button onClick={() => onDelete(item.id)}>❌</button>
+        </li>
+    )
+}
+
+
+const Stats = () => {
+    return (
+        <footer className={'stats'}>
+            <em>
+                You Have X items on your list, and you already packed X
+            </em>
+        </footer>
+    )
+};
+
+
+export default App
+```
+
 ## 007 Updating an Item Complex Immutable Data Operation
 ## 008 Derived State
 ## 009 Calculating Statistics as Derived State

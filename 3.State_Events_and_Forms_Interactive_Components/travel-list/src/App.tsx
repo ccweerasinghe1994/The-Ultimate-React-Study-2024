@@ -8,17 +8,38 @@ type Item = {
 };
 
 
-const initialItems: Item[] = [
-    {id: 1, description: "Passports", quantity: 2, packed: false},
-    {id: 2, description: "Socks", quantity: 12, packed: true},
-];
+type PropsItem = {
+    item: Item;
+    onDelete: (id: number) => void;
+};
+
+
+type PropsForm = {
+    onAddItem: (item: Item) => void;
+}
+
+type PropsPackagingList = {
+    items: Item[];
+    onDelete: (id: number) => void;
+
+}
+
 
 function App() {
+
+    const [items, setItems] = useState<Item[]>([]);
+
+    const handleAddItem = (item: Item) => {
+        setItems([...items, item]);
+    }
+    const handleDeleteItem = (id: number) => {
+        setItems(items.filter(item => item.id !== id));
+    }
     return (
         <div className={'app'}>
             <Logo/>
-            <Form/>
-            <PackingList/>
+            <Form onAddItem={handleAddItem}/>
+            <PackingList onDelete={handleDeleteItem} items={items}/>
             <Stats/>
         </div>
     )
@@ -29,28 +50,33 @@ const Logo = () => {
         <h1> 🌴 Far Away 💼</h1>
     )
 };
-const Form = () => {
+
+const Form: FC<PropsForm> = ({onAddItem}) => {
 
     const [description, setDescription] = useState<string>('');
     const [quantity, setQuantity] = useState<number>(1);
+
+
+    const reset = () => {
+        setDescription('');
+        setQuantity(1);
+    };
+
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         if (!description) return;
 
-
         const newItem: Item = {
-            id: initialItems.length + 1,
+            id: new Date().getTime(),
             description,
             quantity,
             packed: false
         }
 
-        initialItems.push(newItem);
+        onAddItem(newItem);
+        reset();
 
-        setDescription('');
-        setQuantity(1);
-        
     }
 
     const handleChange = (e: FormEvent<HTMLInputElement>) => {
@@ -72,27 +98,26 @@ const Form = () => {
         </form>
     )
 };
-const PackingList = () => {
+
+
+const PackingList: FC<PropsPackagingList> = ({items, onDelete}) => {
     return (
         <div className={'list'}>
             <ul>
-                {initialItems.map(item => <Item key={item.id} item={item}/>)}
+                {items.map(item => <Item onDelete={onDelete} key={item.id} item={item}/>)}
             </ul>
         </div>
     )
 };
 
-type Props = {
-    item: Item;
-};
 
-const Item: FC<Props> = ({item}) => {
+const Item: FC<PropsItem> = ({item, onDelete}) => {
     return (
         <li>
             <span style={item.packed ? {textDecoration: 'line-through'} : {}}>
             {item.quantity} {item.description}
             </span>
-            <button>❌</button>
+            <button onClick={() => onDelete(item.id)}>❌</button>
         </li>
     )
 }
