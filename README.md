@@ -50,7 +50,7 @@
 
 ## 9. PART 2 INTERMEDIATE REACT
 
-## 10. Thinking in React Components, Composition, and Reusability
+## [10. Thinking in React Components, Composition, and Reusability](./docs/10-ThinkinginReactComponentsComposition,andReusability/readme.md)
 
 ## 11. How React Works Behind the Scenes
 
