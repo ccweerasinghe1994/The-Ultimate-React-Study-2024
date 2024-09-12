@@ -1,6 +1,10 @@
-import {FC, FormEvent, useState} from "react";
+import {useState} from "react";
+import Logo from "./Logo.tsx";
+import Stats from "./Stats.tsx";
+import PackingList from "./PackageList.tsx";
+import Form from "./Form.tsx";
 
-type Item = {
+export type TItem = {
     id: number;
     description: string;
     quantity: number;
@@ -8,34 +12,11 @@ type Item = {
 };
 
 
-type PropsItem = {
-    item: Item;
-    onDelete: (id: number) => void;
-    onChange: (id: number) => void;
-};
-
-
-type PropsForm = {
-    onAddItem: (item: Item) => void;
-}
-
-type PropsPackagingList = {
-    items: Item[];
-    onDelete: (id: number) => void;
-    onChange: (id: number) => void;
-
-}
-
-type PropsStats = {
-    items: Item[]
-}
-
-
 function App() {
 
-    const [items, setItems] = useState<Item[]>([]);
+    const [items, setItems] = useState<TItem[]>([]);
 
-    const handleAddItem = (item: Item) => {
+    const handleAddItem = (item: TItem) => {
         setItems([...items, item]);
     }
     const handleDeleteItem = (id: number) => {
@@ -53,142 +34,19 @@ function App() {
             return item;
         }))
     };
-
+    const onClearPackingList = () => {
+        setItems([]);
+    }
     return (
         <div className={'app'}>
             <Logo/>
             <Form onAddItem={handleAddItem}/>
-            <PackingList onDelete={handleDeleteItem} items={items} onChange={handleItemChange}/>
+            <PackingList handleClearPackingList={onClearPackingList} onDelete={handleDeleteItem} items={items}
+                         onChange={handleItemChange}/>
             <Stats items={items}/>
         </div>
     )
 }
-
-const Logo = () => {
-    return (
-        <h1> 🌴 Far Away 💼</h1>
-    )
-};
-
-const Form: FC<PropsForm> = ({onAddItem}) => {
-
-    const [description, setDescription] = useState<string>('');
-    const [quantity, setQuantity] = useState<number>(1);
-
-
-    const reset = () => {
-        setDescription('');
-        setQuantity(1);
-    };
-
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-
-        if (!description) return;
-
-        const newItem: Item = {
-            id: new Date().getTime(),
-            description,
-            quantity,
-            packed: false
-        }
-
-        onAddItem(newItem);
-        reset();
-
-    }
-
-    const handleChange = (e: FormEvent<HTMLInputElement>) => {
-        setDescription(e.currentTarget.value);
-    }
-
-    return (
-        <form onSubmit={handleSubmit} className={'add-form'}>
-            <h3>What is you need for your trip ?</h3>
-            <select value={quantity} onChange={event => setQuantity(+event.target.value)}>
-                {
-                    Array.from({length: 20}, (_, i) => (
-                        <option key={i + 1} value={i + 1}>{i + 1}</option>
-                    ))
-                }
-            </select>
-            <input type="text" placeholder={"type a item here"} value={description} onChange={handleChange}/>
-            <button>add</button>
-        </form>
-    )
-};
-
-
-const PackingList: FC<PropsPackagingList> = ({items, onDelete, onChange}) => {
-
-    const [sortBy, setSortBy] = useState<string>('input');
-
-    let sortedItems: Item[] = [...items];
-
-    if (sortBy === 'description') {
-        sortedItems.sort((a, b) => a.description.localeCompare(b.description))
-    }
-
-    if (sortBy === 'unpacked') {
-        sortedItems.sort((a, b) => Number(b.packed) - Number(a.packed))
-    }
-
-    if (sortBy === 'input') {
-        sortedItems = items;
-    }
-
-
-    return (
-        <div className={'list'}>
-            <ul>
-                {sortedItems.map(item => <Item onDelete={onDelete} key={item.id} item={item} onChange={onChange}/>)}
-            </ul>
-            <div className="actions">
-                <select name="" id="" value={sortBy} onChange={e => setSortBy(e.target.value)}>
-                    <option value="input">input</option>
-                    <option value="description">description</option>
-                    <option value="unpacked">unpacked</option>
-                </select>
-            </div>
-        </div>
-    )
-};
-
-
-const Item: FC<PropsItem> = ({item, onDelete, onChange}) => {
-    return (
-        <li>
-            <input type="checkbox" value={item.packed.toString()} onChange={() => onChange(item.id)}/>
-            <span style={item.packed ? {textDecoration: 'line-through'} : {}}>
-            {item.quantity} {item.description}
-            </span>
-            <button onClick={() => onDelete(item.id)}>❌</button>
-        </li>
-    )
-}
-
-
-const Stats: FC<PropsStats> = ({items}) => {
-
-    if (!items.length) {
-        return <footer className={'stats'}>Start adding items to your packing list 😊 </footer>
-    }
-
-    const totalItems = items.length;
-    const pickedItems = items.filter(item => item.packed).length;
-    const percentage = (pickedItems / totalItems) * 100;
-    const completeMessage = "You are ready to go! ✈️";
-    const incompleteMessage = `You Have ${totalItems} items on your list, and you already packed ${pickedItems}(${percentage}%)`
-    return (
-        <footer className={'stats'}>
-            <em>
-                {
-                    percentage === 100 ? completeMessage : incompleteMessage
-                }
-            </em>
-        </footer>
-    )
-};
 
 
 export default App
