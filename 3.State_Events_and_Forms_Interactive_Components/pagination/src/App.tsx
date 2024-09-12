@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {FC, ReactNode, useState} from "react";
 
 const messages: string[] = [
     "Learn React ⚛️",
@@ -34,25 +34,53 @@ function App() {
                         <div className={`${step >= 2 ? 'active' : ''}`}>2</div>
                         <div className={`${step >= 3 ? 'active' : ''}`}>3</div>
                     </div>
-                    <div className="message">
-                        step {step}:{messages[step - 1]}
-                    </div>
+                    <StepPage step={step}>
+                        {messages[step - 1]}
+                    </StepPage>
                     <div className="buttons">
-                        <button onClick={handlePrevious} style={{
-                            backgroundColor: "#7950f2",
-                            color: "#fff",
-                        }}>Previous
-                        </button>
-                        <button onClick={handleNext} style={{
-                            backgroundColor: "#7950f2",
-                            color: "#fff",
-                        }}>Next
-                        </button>
+                        <Button onClick={handlePrevious} backgroundColor="#7950f2"
+                                textColor="#fff">🫲 Previous</Button>
+                        <Button onClick={handleNext}
+                                backgroundColor="#7950f2"
+                                textColor="#fff">Next 🫱</Button>
+
                     </div>
                 </div> : ''
             }
 
         </>
+    )
+}
+
+type PropsButton = {
+    children: ReactNode;
+    onClick: () => void;
+    backgroundColor: string;
+    textColor: string;
+}
+const Button: FC<PropsButton> = ({children, textColor, backgroundColor, onClick}) => {
+    return <button onClick={onClick} style={{
+        backgroundColor: backgroundColor,
+        color: textColor,
+    }}>{children}
+    </button>
+
+}
+type PropsStep = {
+    step: number;
+    children: ReactNode;
+}
+
+const StepPage: FC<PropsStep> = ({children, step}) => {
+    return (
+        <div className="message">
+            <h3>
+                step {step}
+            </h3>
+            <div>
+                {children}
+            </div>
+        </div>
     )
 }
 
