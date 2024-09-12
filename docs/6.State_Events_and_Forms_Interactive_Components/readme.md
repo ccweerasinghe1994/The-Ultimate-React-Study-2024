@@ -135,7 +135,39 @@
   - [16. Rendering the Items List](#16-rendering-the-items-list)
   - [17. Building a Form and Handling Submissions](#17-building-a-form-and-handling-submissions)
   - [18. Controlled Elements](#18-controlled-elements)
+    - [What Are Controlled Components?](#what-are-controlled-components)
+    - [How Controlled Components Work](#how-controlled-components-work)
+    - [Example 1: Controlled Input Element (Text Field)](#example-1-controlled-input-element-text-field)
+    - [Breakdown:](#breakdown)
+    - [Result:](#result)
+    - [Example 2: Controlled Checkbox](#example-2-controlled-checkbox)
+    - [Breakdown:](#breakdown-1)
+    - [Result:](#result-1)
+    - [Example 3: Controlled Select Dropdown](#example-3-controlled-select-dropdown)
+    - [Breakdown:](#breakdown-2)
+    - [Result:](#result-2)
+    - [Benefits of Controlled Components](#benefits-of-controlled-components)
+    - [Challenges with Controlled Components](#challenges-with-controlled-components)
+    - [Uncontrolled Components: An Alternative Approach](#uncontrolled-components-an-alternative-approach)
+    - [Key Differences Between Controlled and Uncontrolled Components:](#key-differences-between-controlled-and-uncontrolled-components)
+    - [Conclusion](#conclusion-5)
   - [19. State vs. Props](#19-state-vs-props)
+  - [**State vs. Props in React**](#state-vs-props-in-react)
+    - [1. **State**:](#1-state)
+      - [**Example of State in a Functional Component**:](#example-of-state-in-a-functional-component)
+    - [How it Works:](#how-it-works)
+    - [2. **Props**:](#2-props)
+      - [**Example of Props in a Functional Component**:](#example-of-props-in-a-functional-component)
+    - [How it Works:](#how-it-works-1)
+  - [**Breaking Down the Image**](#breaking-down-the-image)
+    - [**State (Left Side)**:](#state-left-side)
+      - [Example Based on the Image:](#example-based-on-the-image)
+    - [**Props (Right Side)**:](#props-right-side)
+      - [How It Works:](#how-it-works-2)
+    - [**Key Differences Between State and Props**](#key-differences-between-state-and-props)
+    - [**Example: Combining State and Props in an Interactive Component**](#example-combining-state-and-props-in-an-interactive-component)
+    - [Breakdown:](#breakdown-3)
+    - [Final Thoughts:](#final-thoughts)
   - [20. EXERCISE #1 Flashcards](#20-exercise-1-flashcards)
   - [21. CHALLENGE #2 Date Counter (v2)](#21-challenge-2-date-counter-v2)
 
@@ -2180,8 +2212,634 @@ export default App
 ![alt text](image-12.png)
 
 ## 16. Rendering the Items List
+
+```tsx
+import {FC, FormEvent} from "react";
+
+type Item = {
+    id: number;
+    description: string;
+    quantity: number;
+    packed: boolean;
+};
+
+
+const initialItems: Item[] = [
+    {id: 1, description: "Passports", quantity: 2, packed: false},
+    {id: 2, description: "Socks", quantity: 12, packed: true},
+];
+
+function App() {
+    return (
+        <div className={'app'}>
+            <Logo/>
+            <Form/>
+            <PackingList/>
+            <Stats/>
+        </div>
+    )
+}
+
+const Logo = () => {
+    return (
+        <h1> 🌴 Far Away 💼</h1>
+    )
+};
+const Form = () => {
+
+    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        console.log('submit');
+    }
+
+    return (
+        <form onSubmit={handleSubmit} className={'add-form'}>
+            <h3>What is you need for your trip ?</h3>
+            <select name="" id="">
+                {
+                    Array.from({length: 20}, (_, i) => (
+                        <option key={i} value={i}>{i}</option>
+                    ))
+                }
+            </select>
+            <input type="text" value={'Item...'}/>
+            <button>add</button>
+        </form>
+    )
+};
+const PackingList = () => {
+    return (
+        <div className={'list'}>
+            <ul>
+                {initialItems.map(item => <Item key={item.id} item={item}/>)}
+            </ul>
+        </div>
+    )
+};
+
+type Props = {
+    item: Item;
+};
+
+const Item: FC<Props> = ({item}) => {
+    return (
+        <li>
+            <span style={item.packed ? {textDecoration: 'line-through'} : {}}>
+            {item.quantity} {item.description}
+            </span>
+            <button>❌</button>
+        </li>
+    )
+}
+
+
+const Stats = () => {
+    return (
+        <footer className={'stats'}>
+            <em>
+                You Have X items on your list, and you already packed X
+            </em>
+        </footer>
+    )
+};
+
+
+export default App
+```
+![alt text](image-13.png)
 ## 17. Building a Form and Handling Submissions
+
+```tsx
+import {FC, FormEvent, useState} from "react";
+
+type Item = {
+    id: number;
+    description: string;
+    quantity: number;
+    packed: boolean;
+};
+
+
+const initialItems: Item[] = [
+    {id: 1, description: "Passports", quantity: 2, packed: false},
+    {id: 2, description: "Socks", quantity: 12, packed: true},
+];
+
+function App() {
+    return (
+        <div className={'app'}>
+            <Logo/>
+            <Form/>
+            <PackingList/>
+            <Stats/>
+        </div>
+    )
+}
+
+const Logo = () => {
+    return (
+        <h1> 🌴 Far Away 💼</h1>
+    )
+};
+const Form = () => {
+
+    const [description, setDescription] = useState<string>('');
+    const [quantity, setQuantity] = useState<number>(1);
+    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        if (!description) return;
+
+
+        const newItem: Item = {
+            id: initialItems.length + 1,
+            description,
+            quantity,
+            packed: false
+        }
+
+        initialItems.push(newItem);
+
+        setDescription('');
+        setQuantity(1);
+        
+    }
+
+    const handleChange = (e: FormEvent<HTMLInputElement>) => {
+        setDescription(e.currentTarget.value);
+    }
+
+    return (
+        <form onSubmit={handleSubmit} className={'add-form'}>
+            <h3>What is you need for your trip ?</h3>
+            <select value={quantity} onChange={event => setQuantity(+event.target.value)}>
+                {
+                    Array.from({length: 20}, (_, i) => (
+                        <option key={i + 1} value={i + 1}>{i + 1}</option>
+                    ))
+                }
+            </select>
+            <input type="text" placeholder={"type a item here"} value={description} onChange={handleChange}/>
+            <button>add</button>
+        </form>
+    )
+};
+const PackingList = () => {
+    return (
+        <div className={'list'}>
+            <ul>
+                {initialItems.map(item => <Item key={item.id} item={item}/>)}
+            </ul>
+        </div>
+    )
+};
+
+type Props = {
+    item: Item;
+};
+
+const Item: FC<Props> = ({item}) => {
+    return (
+        <li>
+            <span style={item.packed ? {textDecoration: 'line-through'} : {}}>
+            {item.quantity} {item.description}
+            </span>
+            <button>❌</button>
+        </li>
+    )
+}
+
+
+const Stats = () => {
+    return (
+        <footer className={'stats'}>
+            <em>
+                You Have X items on your list, and you already packed X
+            </em>
+        </footer>
+    )
+};
+
+
+export default App
+
+```
+
 ## 18. Controlled Elements
+
+In React, **controlled components** (or **controlled elements**) refer to form elements (like input fields, checkboxes, text areas, etc.) that are controlled by the React state. This means that the state of the form element is managed and updated using React’s state (`useState`), and any changes to the form input reflect directly in the component’s state.
+
+### What Are Controlled Components?
+
+A **controlled component** is one where the form element’s value (like the value of an input field) is controlled by the state in a React component. The component’s state becomes the **single source of truth** for the input’s value.
+
+This approach makes it easy to:
+- **Track changes** to the input fields,
+- **Validate inputs** as the user types,
+- **Submit** form data, and
+- **Reset form values**.
+
+### How Controlled Components Work
+
+In a controlled component, the **value** of the input field is tied to the state. You manage the state with React’s `useState` (in function components) or `this.state` in class components. Whenever the user types into an input field, an `onChange` event is triggered, and you update the state accordingly.
+
+Here’s a deep dive into how this works, with examples.
+
+---
+
+### Example 1: Controlled Input Element (Text Field)
+
+Let’s take a simple example of a controlled text input in React:
+
+```jsx
+import React, { useState } from 'react';
+
+function ControlledInput() {
+  const [name, setName] = useState(''); // State to hold the input value
+
+  const handleChange = (event) => {
+    setName(event.target.value); // Update state when input changes
+  };
+
+  return (
+    <div>
+      <label>
+        Name:
+        <input
+          type="text"
+          value={name} // Controlled input bound to state
+          onChange={handleChange} // Event handler updates the state
+        />
+      </label>
+      <p>Your name is: {name}</p>
+    </div>
+  );
+}
+
+export default ControlledInput;
+```
+
+### Breakdown:
+
+1. **State Initialization**: 
+   - The `useState` hook initializes `name` as an empty string (`''`). This state will hold the value of the input field.
+
+2. **Binding the Input’s `value` to the State**:
+   - The `value` of the input field is tied to the `name` state: `<input value={name} />`. This makes the input **controlled** because its value is managed by React’s state.
+
+3. **Handling Input Changes**:
+   - The `onChange` handler is triggered every time the user types in the input field. It calls `setName(event.target.value)`, which updates the state with the new input value (`event.target.value`).
+
+4. **Displaying the Value**:
+   - The updated `name` state is displayed in a paragraph below the input, dynamically updating as the user types.
+
+### Result:
+- As the user types into the input field, the `name` state is updated in real-time, and the displayed text (`Your name is: ...`) updates accordingly.
+
+---
+
+### Example 2: Controlled Checkbox
+
+You can also create a controlled checkbox, where the `checked` property of the checkbox is controlled by the component’s state.
+
+```jsx
+import React, { useState } from 'react';
+
+function ControlledCheckbox() {
+  const [isChecked, setIsChecked] = useState(false); // State to track checkbox status
+
+  const handleCheckboxChange = (event) => {
+    setIsChecked(event.target.checked); // Update state with checkbox's checked status
+  };
+
+  return (
+    <div>
+      <label>
+        <input
+          type="checkbox"
+          checked={isChecked} // Controlled checkbox bound to state
+          onChange={handleCheckboxChange} // Event handler to update state
+        />
+        Subscribe to newsletter
+      </label>
+      <p>{isChecked ? 'Subscribed' : 'Not subscribed'}</p>
+    </div>
+  );
+}
+
+export default ControlledCheckbox;
+```
+
+### Breakdown:
+
+1. **State Initialization**:
+   - The `useState` hook initializes `isChecked` as `false`, meaning the checkbox is initially unchecked.
+
+2. **Binding the `checked` Property**:
+   - The `checked` attribute of the checkbox is controlled by the `isChecked` state: `<input checked={isChecked} />`.
+
+3. **Handling Change Events**:
+   - The `onChange` handler updates the `isChecked` state based on whether the checkbox is checked (`event.target.checked`).
+
+4. **Display Subscription Status**:
+   - Below the checkbox, the subscription status (`Subscribed` or `Not subscribed`) updates based on the current value of `isChecked`.
+
+### Result:
+- When the user clicks the checkbox, the `isChecked` state toggles between `true` and `false`, and the displayed message updates accordingly.
+
+---
+
+### Example 3: Controlled Select Dropdown
+
+You can also use a controlled select dropdown where the selected option is tied to a state variable.
+
+```jsx
+import React, { useState } from 'react';
+
+function ControlledSelect() {
+  const [selectedOption, setSelectedOption] = useState('apple'); // State for selected option
+
+  const handleSelectChange = (event) => {
+    setSelectedOption(event.target.value); // Update state with selected option
+  };
+
+  return (
+    <div>
+      <label>
+        Choose a fruit:
+        <select value={selectedOption} onChange={handleSelectChange}>
+          <option value="apple">Apple</option>
+          <option value="banana">Banana</option>
+          <option value="orange">Orange</option>
+        </select>
+      </label>
+      <p>Your selected fruit is: {selectedOption}</p>
+    </div>
+  );
+}
+
+export default ControlledSelect;
+```
+
+### Breakdown:
+
+1. **State Initialization**:
+   - The `useState` hook initializes `selectedOption` to `"apple"`, so "Apple" is the initially selected option.
+
+2. **Binding the `value` to State**:
+   - The `value` attribute of the `<select>` element is tied to the `selectedOption` state.
+
+3. **Handling the `onChange` Event**:
+   - The `onChange` handler updates the state with the currently selected option (`event.target.value`).
+
+4. **Displaying the Selected Option**:
+   - The selected fruit is displayed below the dropdown in real-time.
+
+### Result:
+- As the user selects a different option, the state is updated, and the displayed text updates to reflect the selected fruit.
+
+---
+
+### Benefits of Controlled Components
+
+1. **Single Source of Truth**:
+   - The value of the form inputs is controlled by the component’s state, ensuring that the component state always reflects the form values and vice versa.
+
+2. **Real-Time Form Validation**:
+   - Controlled components make it easy to perform form validation as the user types. You can immediately check the input values and provide feedback to the user.
+
+3. **Flexible and Dynamic**:
+   - Controlled components allow you to dynamically update the form based on external conditions, such as enabling or disabling fields, changing options in a dropdown, or setting default values programmatically.
+
+4. **Full Control Over Form Submission**:
+   - When the form is submitted, the state contains all the values. This makes handling form submission and processing the data easier, as you can just use the state object.
+
+### Challenges with Controlled Components
+
+- **More Code**: For each input, you need to maintain state and write event handlers, which can make the code more verbose, especially in large forms.
+  
+- **Performance Considerations**: Since React re-renders components every time the state changes, performance could become a concern in very large forms or with many frequent updates (e.g., typing quickly in a text input). In such cases, optimizations like `React.memo` or debouncing input updates might be necessary.
+
+---
+
+### Uncontrolled Components: An Alternative Approach
+
+The alternative to **controlled components** are **uncontrolled components**, where form inputs maintain their own internal state rather than being controlled by React. In uncontrolled components, you would use `ref` to access the values directly from the DOM when needed, instead of managing the state in React.
+
+Example of an **uncontrolled input**:
+
+```jsx
+import React, { useRef } from 'react';
+
+function UncontrolledInput() {
+  const inputRef = useRef(null); // Reference to the DOM input element
+
+  const handleSubmit = () => {
+    alert(`Input Value: ${inputRef.current.value}`); // Access the input value directly from the DOM
+  };
+
+  return (
+    <div>
+      <input type="text" ref={inputRef} />
+      <button onClick={handleSubmit}>Submit</button>
+    </div>
+  );
+}
+
+export default UncontrolledInput;
+```
+
+### Key Differences Between Controlled and Uncontrolled Components:
+
+1. **Controlled Components**: The form data is controlled by React’s state.
+2. **Uncontrolled Components**: The form data is handled by the DOM directly, with refs used to access the current value.
+
+---
+
+### Conclusion
+
+**Controlled components** provide a powerful and flexible way to manage form elements in React, ensuring that React state is the single source of truth for input values. While they require more setup than uncontrolled components, they offer better control over input validation, dynamic behavior, and form submission. Understanding how to use controlled components effectively is key to building interactive and dynamic forms in React applications.
+
 ## 19. State vs. Props
+
+![alt text](image-14.png)
+
+The image you’ve provided explains the difference between **state** and **props** in React, which are two core concepts for managing and passing data between components. Let’s break it down and provide a detailed explanation, along with examples for both.
+
+## **State vs. Props in React**
+
+### 1. **State**:
+- **Definition**: State is **internal data** that belongs to a specific component. It's used to keep track of variables that change over time within that component. The component itself manages and updates this data. 
+- **Component “Memory”**: State acts like a component’s "memory," meaning that it can store values over time, and these values can change based on user interactions or other conditions.
+- **Updatable**: A component can update its own state using the `setState` function (for class components) or the `useState` hook (for function components).
+- **Triggers Re-render**: When a component’s state is updated, React will trigger a **re-render** of the component. This ensures that the user interface always reflects the current state of the component.
+- **Usage**: State is generally used for data that changes, such as form inputs, toggles, counters, etc., making components interactive.
+
+#### **Example of State in a Functional Component**:
+
+```jsx
+import React, { useState } from 'react';
+
+function Counter() {
+  const [count, setCount] = useState(0); // Initialize state with useState hook
+
+  const increment = () => {
+    setCount(count + 1); // Update the state
+  };
+
+  return (
+    <div>
+      <p>Current count: {count}</p>
+      <button onClick={increment}>Increment</button>
+    </div>
+  );
+}
+
+export default Counter;
+```
+
+### How it Works:
+- `useState(0)` initializes the `count` state to 0.
+- The state (`count`) is displayed in the `<p>` tag.
+- When the "Increment" button is clicked, `setCount` updates the state to the current value of `count + 1`.
+- React re-renders the `Counter` component to reflect the updated state.
+
+### 2. **Props**:
+- **Definition**: **Props** are short for "properties," and they are **external data** passed to a component from its parent component. Props are essentially a way to pass data **down** the component tree.
+- **Similar to Function Parameters**: Just like a function can receive arguments, a component can receive props from its parent. These props are read-only and cannot be modified by the component receiving them.
+- **Read-only**: Unlike state, which can be updated by the component, **props** are immutable in the receiving component. They are used as inputs and are not directly modified.
+- **Triggers Re-render**: If the parent component passes new props, React triggers a re-render of the child component so that it can reflect the new prop values.
+- **Usage**: Props are used to pass data and configuration settings from one component to another, allowing for reusable components.
+
+#### **Example of Props in a Functional Component**:
+
+```jsx
+import React from 'react';
+
+function Greeting(props) {
+  return <h1>Hello, {props.name}!</h1>;
+}
+
+function App() {
+  return <Greeting name="John" />;
+}
+
+export default App;
+```
+
+### How it Works:
+- `App` is the parent component and passes the `name` prop (`"John"`) to the `Greeting` component.
+- The `Greeting` component receives `props` and displays "Hello, John!".
+- `props.name` is read-only, and the `Greeting` component cannot modify it. If the parent `App` were to change the `name` prop, `Greeting` would re-render with the new value.
+
+---
+
+## **Breaking Down the Image**
+
+Let’s analyze the details shown in the image for both **state** and **props**:
+
+### **State (Left Side)**:
+
+- **Internal Data**: The state is internal to the component and is initialized in the `Question` component with `useState(0)`. In the example, `upvotes` and `setUpvotes` are used to manage the state.
+- **Component “Memory”**: The component keeps track of how many upvotes it has (similar to "memory"), and this value can be updated.
+- **Can Be Updated by the Component**: The `setUpvotes` function updates the `upvotes` state. This is a core principle of state — a component manages and updates its own state.
+- **Triggers Re-render**: When `setUpvotes` is called, the component re-renders to reflect the new value of `upvotes`.
+- **Usage**: The `upvotes` state is used to track the number of upvotes, and it’s passed to the `Button` component as a prop (`upvotes={upvotes}`).
+
+#### Example Based on the Image:
+
+```jsx
+function Question() {
+  const [upvotes, setUpvotes] = useState(0); // State for upvotes
+
+  return (
+    <div>
+      <Button upvotes={upvotes} bgColor="blue" /> {/* Pass state as props */}
+    </div>
+  );
+}
+
+function Button({ upvotes, bgColor }) {
+  return (
+    <button style={{ background: bgColor }}>
+      👍 {upvotes} Upvotes {/* Use props */}
+    </button>
+  );
+}
+```
+
+### **Props (Right Side)**:
+
+- **External Data**: In this case, `Button` is receiving `upvotes` and `bgColor` as **props** from the `Question` component.
+- **Similar to Function Parameters**: These props are passed into the `Button` component like function arguments (`Button({ upvotes, bgColor })`).
+- **Read-only**: The `Button` component cannot directly modify `upvotes` or `bgColor`; it only uses them to render the button.
+- **New Props Trigger Re-render**: If `Question` changes the value of `upvotes` (through `setUpvotes`), the `Button` component will re-render automatically with the new value.
+- **Usage**: The `Button` component is configured using the `upvotes` and `bgColor` props, allowing it to display the correct data and style.
+
+#### How It Works:
+1. **State in the Parent Component** (`Question`): 
+   - Manages the `upvotes` state.
+   - Passes the `upvotes` and `bgColor` props to the `Button` component.
+
+2. **Props in the Child Component** (`Button`):
+   - Receives the `upvotes` and `bgColor` as props and uses them to render the button with the correct label and background color.
+   - Cannot modify these values directly.
+
+---
+
+### **Key Differences Between State and Props**
+
+| **State**                           | **Props**                               |
+|-------------------------------------|----------------------------------------|
+| Internal data, owned by the component itself. | External data, owned by the parent component. |
+| Can be updated by the component itself using `setState` or `useState`. | Cannot be modified by the component receiving the props (read-only). |
+| Updating state triggers a re-render of the component. | Receiving new props triggers a re-render of the component. |
+| State can change over time, making the component interactive. | Props are passed from parent to child and are static in the receiving component. |
+| Typically used for dynamic data that changes within the component. | Used to pass data and configuration from a parent to a child component. |
+
+---
+
+### **Example: Combining State and Props in an Interactive Component**
+
+Let’s combine both state and props to build a simple interactive voting component.
+
+```jsx
+import React, { useState } from 'react';
+
+function Question() {
+  const [upvotes, setUpvotes] = useState(0);
+
+  const incrementUpvotes = () => {
+    setUpvotes(upvotes + 1);
+  };
+
+  return (
+    <div>
+      <Button upvotes={upvotes} bgColor="blue" onClick={incrementUpvotes} />
+    </div>
+  );
+}
+
+function Button({ upvotes, bgColor, onClick }) {
+  return (
+    <button style={{ background: bgColor }} onClick={onClick}>
+      👍 {upvotes} Upvotes
+    </button>
+  );
+}
+
+export default Question;
+```
+
+### Breakdown:
+- The `Question` component manages the **state** for `upvotes` and updates it using `setUpvotes`.
+- The `Button` component receives `upvotes` and `bgColor` as **props** from `Question`.
+- The `onClick` handler is also passed as a prop to the `Button` component, allowing it to update the parent component's state.
+
+### Final Thoughts:
+- **State**: Used when you need the component to manage its own data and behavior over time (like user interactions).
+- **Props**: Used to pass data from a parent component to a child, allowing the parent to control how the child behaves without the child modifying that data directly.
+
+State and props together enable React components to be dynamic and reusable, forming the foundation of interactive and maintainable UIs.
 ## 20. EXERCISE #1 Flashcards
 ## 21. CHALLENGE #2 Date Counter (v2)
