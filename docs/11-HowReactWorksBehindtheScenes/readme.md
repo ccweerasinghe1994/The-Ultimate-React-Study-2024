@@ -3442,6 +3442,249 @@ This process is how React efficiently updates the UI, ensuring only minimal DOM 
 
 Let me know if you'd like to dive deeper into any of these steps!
 ## 008 How Diffing Works
+![alt text](image-21.png)
+![alt text](image-22.png)
+The image explains how **diffing** works in React, which is part of the **Reconciliation** process. Diffing is essential because it helps React determine what has changed in the Virtual DOM, and it allows React to update only the parts of the actual DOM that need to be changed, rather than re-rendering the entire DOM. Let’s break this down:
+
+### Diffing: 2 Fundamental Assumptions (Rules)
+React’s diffing algorithm is built on two key assumptions:
+
+1. **Elements of Different Types Will Produce Different Trees**:
+   - If two elements in the same position have different types (for example, a `<div>` changing to a `<header>`), React assumes that the entire subtree of that element needs to be rebuilt.
+   - This is because React cannot guarantee that the new element will share anything in common with the previous one.
+   - **Example**:
+     ```jsx
+     <div>
+       <SearchBar />
+     </div>
+     ```
+     changes to:
+     ```jsx
+     <header>
+       <SearchBar />
+     </header>
+     ```
+     - React will see that the `<div>` has changed to a `<header>`, so it will destroy the previous `<div>` along with its children (including `SearchBar`), and replace it with the `<header>` and its children.
+
+2. **Elements with a Stable Key Prop Stay the Same Across Renders**:
+   - Elements that have a stable `key` prop are assumed to be the same across renders, even if they appear in different orders or positions.
+   - This allows React to keep track of elements in a list and only update the ones that have changed, rather than re-rendering the entire list.
+
+### Example of Diffing in Action:
+
+Consider the following example of a React component:
+
+**Initial Render:**
+```jsx
+function App() {
+  return (
+    <div>
+      <SearchBar />
+    </div>
+  );
+}
+```
+The Virtual DOM for this initial render might look like this:
+```html
+<div>
+  <SearchBar />
+</div>
+```
+
+Now, let’s say we update the component to use a `<header>` instead of a `<div>`:
+
+**Updated Render:**
+```jsx
+function App() {
+  return (
+    <header>
+      <SearchBar />
+    </header>
+  );
+}
+```
+The updated Virtual DOM would look like this:
+```html
+<header>
+  <SearchBar />
+</header>
+```
+
+#### What Happens in the Diffing Process?
+- React notices that the **tag** at the same position in the tree has changed from a `<div>` to a `<header>`.
+- React assumes that the entire subtree under the `<div>` (including the `SearchBar` component) is no longer valid and should be destroyed.
+- React will destroy the `<div>` and all of its children (including `SearchBar`), and create a new `<header>` element with the new `SearchBar` component.
+- Even though `SearchBar` might be the same component, React still destroys and recreates it because its parent has changed from `<div>` to `<header>`.
+
+### Why React Rebuilds the Subtree
+React rebuilds the subtree because it makes an assumption that different element types (such as `<div>` and `<header>`) will have entirely different structures, and there may not be an efficient way to reconcile them. This approach simplifies the process, but it can sometimes result in React destroying and recreating more elements than necessary.
+
+#### Key Points:
+- **Same Position, Different Element**: If two elements in the same position in the component tree have different types, React will destroy the old element and all of its children.
+- **Old Components Destroyed**: The old components (and their state) are destroyed, and the new components are rendered from scratch.
+- **State is Reset**: If the components in the subtree had state, that state will be lost when the components are destroyed.
+
+### Example of Component Type Change (Same Position, Different Element):
+Let’s say you have the following component tree:
+
+```jsx
+function App() {
+  return (
+    <div>
+      <SearchBar />
+      <main>Some content here</main>
+    </div>
+  );
+}
+```
+
+Now you update it to this:
+```jsx
+function App() {
+  return (
+    <header>
+      <SearchBar />
+      <main>Some content here</main>
+    </header>
+  );
+}
+```
+
+React will see that the `<div>` has changed to a `<header>`, and it will assume that the entire subtree (including `SearchBar` and `main`) needs to be rebuilt. It will destroy the existing `<div>`, `SearchBar`, and `main`, and replace them with a new `<header>`, `SearchBar`, and `main`.
+
+### Optimization with Keys:
+React can optimize re-rendering of lists or components by using the `key` prop. If elements in the list have the same `key` across renders, React can avoid unnecessary re-renders and only update the elements that have actually changed.
+
+For example:
+```jsx
+function List({ items }) {
+  return (
+    <ul>
+      {items.map(item => (
+        <li key={item.id}>{item.text}</li>
+      ))}
+    </ul>
+  );
+}
+```
+In this example, React uses the `key` prop to identify each `<li>` element. If an item’s `id` stays the same between renders, React will assume that the item hasn’t changed and will avoid re-rendering it.
+
+### Conclusion:
+React’s diffing algorithm works by comparing elements in the Virtual DOM and making assumptions based on the type of elements and their keys. By following the two key rules — that elements of different types produce different trees, and that elements with a stable key remain the same across renders — React can efficiently update the DOM without needing to re-render the entire tree.
+
+- **Different Element, Same Position**: React assumes the entire subtree is invalid and needs to be replaced.
+- **Stable Keys**: React can reuse elements with stable keys, avoiding unnecessary re-renders.
+
+This diffing process allows React to be efficient, even for large applications with many elements.
+![alt text](image-23.png)
+The image explains the concept of how React’s **diffing algorithm** works and its two fundamental assumptions, particularly focusing on how React optimizes re-renders. Let’s break it down with examples and deeper insights:
+
+### React Diffing Algorithm
+React's **diffing algorithm** is essential for efficiently updating the DOM. When React needs to update the UI, it doesn’t replace the entire DOM but updates only what has changed. It compares the previous and the current Virtual DOMs to figure out the minimal set of changes that need to be applied to the actual DOM.
+
+React makes two **fundamental assumptions** during this process:
+
+### 1. **Elements of Different Types Produce Different Trees**
+If two elements have different types (e.g., a `<div>` vs. a `<span>`), React will treat them as completely different and discard the old tree, building a new one. This helps React to optimize by avoiding unnecessary updates when different elements are involved.
+
+**Example:**
+```jsx
+// Initial render
+return <div>Hello, world!</div>;
+
+// Updated render
+return <span>Hello, world!</span>;
+```
+In this case, React will recognize that `<div>` and `<span>` are different elements and will not attempt to update the `<div>`. Instead, it will destroy the old `<div>` and create a new `<span>`.
+
+### 2. **Elements with Stable `key` Props Stay the Same Across Renders**
+React assumes that elements with the same `key` prop are the same element across renders. The `key` helps React identify which elements have changed, been added, or removed. When a key is stable, React reuses the element instead of creating a new one, thus improving performance.
+
+**Example:**
+```jsx
+// Initial render
+const items = [<div key="1">Item 1</div>, <div key="2">Item 2</div>];
+
+// Updated render
+const items = [<div key="1">Item 1</div>, <div key="2">Item 2 Updated</div>];
+```
+React will see that both `<div>` elements have the same keys (`"1"` and `"2"`), and it will update only the content of the second `<div>` without creating new elements.
+
+### How This Relates to the Image:
+
+#### Same Position, Same Element:
+The image highlights how React treats elements that appear in the same position but may have some changes in their attributes or props:
+
+1. **Same DOM Element (First Row)**:
+   - Initially, there is a `<div className="hidden">`.
+   - After the update, the `className` changes to `"active"`.
+   - React identifies that both elements are in the same position and are the same DOM element (`<div>`). It does not destroy or create a new DOM element; instead, it updates the attribute (`className`) and reuses the same element.
+
+   **Key Concept:** The DOM node remains the same, but React updates the props/attributes (like `className`) if they change between renders.
+
+   **Example:**
+   ```jsx
+   // Initial render
+   <div className="hidden"><SearchBar /></div>;
+
+   // Updated render
+   <div className="active"><SearchBar /></div>;
+   ```
+
+2. **Same React Element (Second Row)**:
+   - Initially, there is a `<SearchBar wait={1} />` component.
+   - After the update, the `wait` prop changes to `{5}`.
+   - React recognizes that this is the same component (`<SearchBar />`), so it doesn't destroy the component; it simply updates the prop `wait`.
+
+   **Key Concept:** The component instance remains the same (React does not re-instantiate `SearchBar`), but it passes the updated `wait` prop during re-render.
+
+   **Example:**
+   ```jsx
+   // Initial render
+   <SearchBar wait={1} />;
+   
+   // Updated render
+   <SearchBar wait={5} />;
+   ```
+
+### Additional Notes:
+1. **React Keeps State Intact**: 
+   In both cases, React keeps the state of the elements intact. For instance, if the `SearchBar` component has internal state (e.g., an input field value), that state will be preserved across renders unless you force React to reset it by changing the component's key or unmounting it.
+
+2. **Key Prop for Performance**: 
+   The `key` prop is crucial for lists or dynamic elements. Without it, React may fail to efficiently update elements, leading to issues like stale state, unnecessary re-renders, or performance bottlenecks.
+
+   **Example of Correct Key Usage:**
+   ```jsx
+   const items = [
+     { id: 1, text: "Item 1" },
+     { id: 2, text: "Item 2" }
+   ];
+
+   return (
+     <ul>
+       {items.map(item => <li key={item.id}>{item.text}</li>)}
+     </ul>
+   );
+   ```
+   By giving each `<li>` a stable key (based on the `id` of the item), React can efficiently update, add, or remove list items.
+
+3. **Sometimes You Want to Force Re-rendering**:
+   If you intentionally want React to treat an element as "new" even if its type and position are the same, you can use the `key` prop to force React to recreate it.
+
+   **Example:**
+   ```jsx
+   // Initial render
+   <SearchBar key="1" wait={1} />;
+   
+   // Updated render with a different key forces re-render
+   <SearchBar key="2" wait={1} />;
+   ```
+
+### Summary of Benefits:
+- **Efficient Updates**: React leverages the diffing algorithm to minimize DOM operations. By comparing the Virtual DOM before and after a render, React ensures only the necessary updates are made, leading to faster performance.
+- **Predictable Component Lifecycle**: Because React only reuses components when their keys are the same, developers can predict when components will be updated, unmounted, or recreated, leading to better management of side effects.
+
 ## 009 Diffing Rules in Practice
 ## 010 The Key Prop
 ## 011 Resetting State With the Key Prop
