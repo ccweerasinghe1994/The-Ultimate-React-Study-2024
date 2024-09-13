@@ -1,9 +1,9 @@
 import {FC} from "react";
 
 
-const Star: FC<StarProps> = ({filled, onRating}) => {
+const Star: FC<StarProps> = ({filled, onRating, onHoverOut, onHoverIn}) => {
     return (
-        <span onClick={onRating} style={{
+        <span onMouseEnter={onHoverIn} onMouseLeave={onHoverOut} onClick={onRating} style={{
             width: "48px",
             height: "48px",
         }}>
@@ -20,6 +20,8 @@ export default Star;
 type StarProps = {
     filled: boolean;
     onRating: () => void;
+    onHoverIn: () => void;
+    onHoverOut: () => void;
 }
 
 const emptyStar = <svg

@@ -297,6 +297,43 @@
   - [Further Exploration](#further-exploration-1)
   - [Additional Resources](#additional-resources-3)
   - [013 Handling Hover Events](#013-handling-hover-events)
+  - [Introduction](#introduction-5)
+  - [Overview of the Code](#overview-of-the-code-3)
+  - [Detailed Explanation](#detailed-explanation-2)
+    - [1. The `StarRating` Component (`StarRating.tsx`)](#1-the-starrating-component-starratingtsx)
+      - [Importing Dependencies](#importing-dependencies-4)
+      - [Styling Objects](#styling-objects-1)
+      - [Props Interface](#props-interface-1)
+      - [Component Definition](#component-definition-2)
+      - [State Management](#state-management-1)
+      - [Event Handlers](#event-handlers)
+      - [Rendering the Component](#rendering-the-component-1)
+      - [Summary of `StarRating` Component](#summary-of-starrating-component-1)
+    - [2. The `Star` Component (`Star.tsx`)](#2-the-star-component-startsx)
+      - [Expected `Star` Component Interface](#expected-star-component-interface)
+      - [Expected `Star` Component Structure](#expected-star-component-structure)
+      - [SVG Icons](#svg-icons-1)
+  - [How the Components Work Together](#how-the-components-work-together-1)
+  - [Example Usage](#example-usage-2)
+    - [App Component (`App.tsx`)](#app-component-apptsx-1)
+    - [Expected Behavior](#expected-behavior-3)
+  - [Enhancing the Component](#enhancing-the-component-2)
+    - [Adding Customization Options](#adding-customization-options)
+      - [Updating the Props Interface](#updating-the-props-interface)
+      - [Modifying the Component](#modifying-the-component)
+      - [Example Usage with External Rating Management](#example-usage-with-external-rating-management)
+    - [Customizing Star Appearance](#customizing-star-appearance)
+      - [Adding Color Props](#adding-color-props)
+      - [Updating the `Star` Component](#updating-the-star-component)
+      - [Example Usage with Custom Colors](#example-usage-with-custom-colors)
+  - [Handling Edge Cases and Accessibility](#handling-edge-cases-and-accessibility)
+    - [Edge Cases](#edge-cases)
+    - [Accessibility Enhancements](#accessibility-enhancements)
+      - [Example Accessibility Implementation](#example-accessibility-implementation)
+  - [Conclusion](#conclusion-9)
+  - [Key Takeaways](#key-takeaways-3)
+  - [Further Exploration](#further-exploration-2)
+  - [Additional Resources](#additional-resources-4)
   - [014 Props as a Component API](#014-props-as-a-component-api)
   - [015 Improving Reusability With Props](#015-improving-reusability-with-props)
   - [016 PropTypes](#016-proptypes)
@@ -4587,6 +4624,629 @@ const handleRating = (rate: number) => {
 By thoroughly understanding and experimenting with the provided code and examples, you'll be well-equipped to implement and customize star rating components in your React applications. Happy coding!
 
 ## 013 Handling Hover Events
+
+```tsx
+import {FC, useState} from "react";
+import Star from "./Star";
+
+const StarContainer = {
+    display: "flex",
+    gap: "16px",
+    alignItems: "center",
+};
+
+const StarList = {
+    display: "flex",
+    gap: "4px",
+}
+
+const TextStyle = {
+    lineHeight: "1",
+    margin: "0",
+}
+
+const StarRating: FC<StarRatingProps> = ({maxSize = 10}) => {
+
+    const [rating, setRating] = useState<number>();
+    const [tempRating, setTempRating] = useState<number>();
+    const handleRating = (rate: number) => {
+        setRating(rate);
+    }
+
+    return (
+        <div style={StarContainer}>
+            <div style={StarList}>
+                {
+                    Array.from({length: maxSize}, (_, i) => {
+                        return (
+                            <Star onHoverIn={() => setTempRating(i + 1)} onHoverOut={() => setTempRating(0)}
+                                  filled={tempRating && tempRating >= i + 1 || typeof rating === 'number' && rating >= i + 1}
+                                  onRating={() => handleRating(i + 1)} key={i}/>
+                        );
+                    })
+                }
+            </div>
+            <p style={TextStyle}>{tempRating || rating || ""}</p>
+        </div>
+    );
+
+}
+
+export default StarRating;
+
+type StarRatingProps = {
+    maxSize?: number;
+};
+```
+## Introduction
+
+In this explanation, we'll dive deep into the provided React code that implements a star rating component using TypeScript and functional components (`FC`). The code consists of two main parts:
+
+1. **The `Star` Component**: Represents an individual star that can be filled or empty, with hover effects.
+2. **The `StarRating` Component**: Utilizes the `Star` component to create an interactive star rating system where users can select and preview a rating.
+
+We'll break down each component line by line, explain how they interact, and provide examples to illustrate their usage. By the end, you'll have a comprehensive understanding of how to build and use an interactive star rating component in React.
+
+---
+
+## Overview of the Code
+
+The code is split into two files:
+
+1. **`Star.tsx`**: Defines the `Star` component (provided in previous code snippets).
+2. **`StarRating.tsx`**: Defines the `StarRating` component, which uses the `Star` component.
+
+In this explanation, we'll focus on the `StarRating` component, which adds hover effects to the star rating system, allowing users to preview a rating before selecting it.
+
+---
+
+## Detailed Explanation
+
+### 1. The `StarRating` Component (`StarRating.tsx`)
+
+#### Importing Dependencies
+
+```typescript
+import { FC, useState } from "react";
+import Star from "./Star";
+```
+
+- **`FC`**: The Function Component type from React, used to type the component.
+- **`useState`**: A React hook for managing state within functional components.
+- **`Star`**: The `Star` component imported from a local file, representing individual stars.
+
+#### Styling Objects
+
+```typescript
+const StarContainer = {
+  display: "flex",
+  gap: "16px",
+  alignItems: "center",
+};
+
+const StarList = {
+  display: "flex",
+  gap: "4px",
+};
+
+const TextStyle = {
+  lineHeight: "1",
+  margin: "0",
+};
+```
+
+- **`StarContainer`**: Styles the container holding the stars and the rating text.
+  - `display: "flex"`: Uses flexbox layout.
+  - `gap: "16px"`: Adds space between child elements.
+  - `alignItems: "center"`: Vertically centers items.
+- **`StarList`**: Styles the container for the list of stars.
+  - `gap: "4px"`: Adds space between each star.
+- **`TextStyle`**: Styles the rating text.
+  - `lineHeight: "1"`: Sets the line height.
+  - `margin: "0"`: Removes default margins.
+
+#### Props Interface
+
+```typescript
+type StarRatingProps = {
+  maxSize?: number;
+};
+```
+
+- **`maxSize`**:
+  - An optional prop defining the maximum number of stars.
+  - Defaults to `10` if not provided.
+
+#### Component Definition
+
+```typescript
+const StarRating: FC<StarRatingProps> = ({ maxSize = 10 }) => {
+  // Component logic
+};
+```
+
+- **Explanation**:
+  - Defines the `StarRating` component as a functional component with props typed as `StarRatingProps`.
+  - Destructures `maxSize` from props with a default value of `10`.
+
+#### State Management
+
+```typescript
+const [rating, setRating] = useState<number>();
+const [tempRating, setTempRating] = useState<number>();
+```
+
+- **`rating`**:
+  - Holds the current rating selected by the user.
+  - Initially undefined, indicating no rating selected.
+- **`tempRating`**:
+  - Holds the temporary rating when the user hovers over a star.
+  - Allows the component to display a preview of the rating.
+
+#### Event Handlers
+
+```typescript
+const handleRating = (rate: number) => {
+  setRating(rate);
+};
+```
+
+- **`handleRating`**:
+  - Updates the `rating` state when a star is clicked.
+  - `rate`: The rating value corresponding to the star clicked.
+
+#### Rendering the Component
+
+```jsx
+return (
+  <div style={StarContainer}>
+    <div style={StarList}>
+      {Array.from({ length: maxSize }, (_, i) => {
+        return (
+          <Star
+            onHoverIn={() => setTempRating(i + 1)}
+            onHoverOut={() => setTempRating(0)}
+            filled={
+              (tempRating && tempRating >= i + 1) ||
+              (typeof rating === "number" && rating >= i + 1)
+            }
+            onRating={() => handleRating(i + 1)}
+            key={i}
+          />
+        );
+      })}
+    </div>
+    <p style={TextStyle}>{tempRating || rating || ""}</p>
+  </div>
+);
+```
+
+- **Star Generation**:
+  - Uses `Array.from` to create an array of length `maxSize`.
+  - Iterates over the array to render `Star` components.
+- **Props Passed to `Star`**:
+  - **`onHoverIn`**:
+    - Sets `tempRating` to the star's index plus one when hovered.
+    - Allows the component to display the preview rating.
+  - **`onHoverOut`**:
+    - Resets `tempRating` to `0` when the mouse leaves the star.
+  - **`filled`**:
+    - Determines if each star should be filled.
+    - Fills stars based on `tempRating` when hovering or `rating` when selected.
+    - Logic:
+      - `tempRating && tempRating >= i + 1`: If hovering, fill up to `tempRating`.
+      - `typeof rating === 'number' && rating >= i + 1`: If not hovering, fill up to `rating`.
+  - **`onRating`**:
+    - Calls `handleRating` with the star's index plus one when clicked.
+  - **`key`**:
+    - Assigns a unique key to each `Star` component for React's reconciliation.
+
+- **Rating Display**:
+  - `<p style={TextStyle}>{tempRating || rating || ""}</p>`:
+    - Displays `tempRating` if hovering.
+    - Displays `rating` if not hovering.
+    - Displays an empty string if neither is set.
+
+#### Summary of `StarRating` Component
+
+- The `StarRating` component renders a list of `Star` components based on `maxSize`.
+- Manages the selected rating (`rating`) and the temporary rating (`tempRating`) for hover effects.
+- Updates the filled state of each star based on the current rating or hover state.
+- Displays the numeric rating value, reflecting the hover state when applicable.
+
+---
+
+### 2. The `Star` Component (`Star.tsx`)
+
+While the code for the `Star` component is not provided in this snippet, based on the usage in `StarRating`, we can infer its structure.
+
+#### Expected `Star` Component Interface
+
+```typescript
+type StarProps = {
+  filled: boolean;
+  onRating: () => void;
+  onHoverIn: () => void;
+  onHoverOut: () => void;
+};
+```
+
+- **Props**:
+  - **`filled`**: Indicates whether the star is filled or empty.
+  - **`onRating`**: Function to handle when the star is clicked.
+  - **`onHoverIn`**: Function to handle when the mouse enters the star.
+  - **`onHoverOut`**: Function to handle when the mouse leaves the star.
+
+#### Expected `Star` Component Structure
+
+```jsx
+const Star: FC<StarProps> = ({ filled, onRating, onHoverIn, onHoverOut }) => {
+  return (
+    <span
+      onClick={onRating}
+      onMouseEnter={onHoverIn}
+      onMouseLeave={onHoverOut}
+      style={{
+        width: "48px",
+        height: "48px",
+        cursor: "pointer",
+      }}
+    >
+      {filled ? filledStar : emptyStar}
+    </span>
+  );
+};
+
+export default Star;
+```
+
+- **Event Handlers**:
+  - **`onClick`**: Calls `onRating` when the star is clicked.
+  - **`onMouseEnter`**: Calls `onHoverIn` when the mouse enters the star.
+  - **`onMouseLeave`**: Calls `onHoverOut` when the mouse leaves the star.
+- **Rendering**:
+  - Conditionally renders the filled or empty star SVG based on the `filled` prop.
+
+#### SVG Icons
+
+- **Filled Star (`filledStar`)** and **Empty Star (`emptyStar`)**:
+  - SVG elements representing the visual state of the star.
+  - Stored in constants and used within the component.
+
+---
+
+## How the Components Work Together
+
+1. **User Interaction**:
+   - When a user hovers over a star, the `onHoverIn` function is called, setting `tempRating` to the star's index plus one.
+   - When the user moves the mouse away from the star, `onHoverOut` resets `tempRating` to `0`.
+   - Clicking a star triggers `onRating`, which updates `rating`.
+
+2. **State Update**:
+   - **Hovering**:
+     - `tempRating` is updated to reflect the hovered star.
+   - **Clicking**:
+     - `rating` is updated to reflect the selected rating.
+
+3. **Re-rendering**:
+   - React re-renders the `StarRating` component when `rating` or `tempRating` changes.
+   - Each `Star` component receives updated props based on the new state.
+
+4. **Visual Update**:
+   - Stars up to `tempRating` (when hovering) or `rating` (when not hovering) are displayed as filled.
+   - The numeric rating is updated and displayed next to the stars.
+
+---
+
+## Example Usage
+
+Assuming you have set up a React project with TypeScript, here's how you might use the `StarRating` component.
+
+### App Component (`App.tsx`)
+
+```jsx
+import React from "react";
+import StarRating from "./StarRating";
+
+function App() {
+  return (
+    <div>
+      <h1>Rate Our Service</h1>
+      <StarRating maxSize={5} />
+    </div>
+  );
+}
+
+export default App;
+```
+
+- **Explanation**:
+  - Imports the `StarRating` component.
+  - Uses it within the `App` component.
+  - Sets `maxSize={5}` to display 5 stars.
+
+### Expected Behavior
+
+- The application displays a heading "Rate Our Service".
+- Below the heading, it shows 5 empty stars.
+- **Hovering Over Stars**:
+  - When a user moves the mouse over a star, all stars up to that one become filled.
+  - The numeric rating next to the stars updates to reflect the hovered rating.
+- **Clicking a Star**:
+  - The stars up to the clicked one remain filled, indicating the selected rating.
+  - The `rating` state is updated.
+- **Moving the Mouse Away**:
+  - If the user moves the mouse away without clicking, the stars revert to the previous state based on `rating`.
+
+---
+
+## Enhancing the Component
+
+### Adding Customization Options
+
+You can enhance the `StarRating` component by adding props for customization, such as colors, sizes, or handling rating changes externally.
+
+#### Updating the Props Interface
+
+```typescript
+type StarRatingProps = {
+  maxSize?: number;
+  initialRating?: number;
+  onRatingChange?: (rating: number) => void;
+};
+```
+
+- **`initialRating`**:
+  - Allows setting an initial rating value.
+- **`onRatingChange`**:
+  - A callback function to notify when the rating changes.
+
+#### Modifying the Component
+
+```typescript
+const StarRating: FC<StarRatingProps> = ({
+  maxSize = 10,
+  initialRating = 0,
+  onRatingChange,
+}) => {
+  const [rating, setRating] = useState<number>(initialRating);
+  const [tempRating, setTempRating] = useState<number>();
+
+  const handleRating = (rate: number) => {
+    setRating(rate);
+    if (onRatingChange) {
+      onRatingChange(rate);
+    }
+  };
+
+  // Rest of the component remains the same
+};
+```
+
+- **Explanation**:
+  - Initializes `rating` with `initialRating`.
+  - Calls `onRatingChange` when the rating is updated.
+
+#### Example Usage with External Rating Management
+
+```jsx
+function App() {
+  const [userRating, setUserRating] = useState<number>(3);
+
+  const handleRatingChange = (newRating: number) => {
+    setUserRating(newRating);
+    // Additional actions, e.g., send to server
+  };
+
+  return (
+    <div>
+      <h1>Rate Our Service</h1>
+      <StarRating
+        maxSize={5}
+        initialRating={userRating}
+        onRatingChange={handleRatingChange}
+      />
+      <p>Your rating: {userRating}</p>
+    </div>
+  );
+}
+
+export default App;
+```
+
+- **Explanation**:
+  - Manages the rating state in the `App` component.
+  - Passes `initialRating` and `onRatingChange` to `StarRating`.
+  - Updates `userRating` when the rating changes.
+
+### Customizing Star Appearance
+
+You can customize the appearance of the stars by passing additional props or modifying the styles.
+
+#### Adding Color Props
+
+```typescript
+type StarRatingProps = {
+  maxSize?: number;
+  // ...other props
+  filledColor?: string;
+  emptyColor?: string;
+};
+```
+
+#### Updating the `Star` Component
+
+```typescript
+type StarProps = {
+  filled: boolean;
+  onRating: () => void;
+  onHoverIn: () => void;
+  onHoverOut: () => void;
+  filledColor?: string;
+  emptyColor?: string;
+};
+
+const Star: FC<StarProps> = ({
+  filled,
+  onRating,
+  onHoverIn,
+  onHoverOut,
+  filledColor = "gold",
+  emptyColor = "gray",
+}) => {
+  const starStyle = {
+    width: "48px",
+    height: "48px",
+    cursor: "pointer",
+    color: filled ? filledColor : emptyColor,
+  };
+
+  return (
+    <span
+      onClick={onRating}
+      onMouseEnter={onHoverIn}
+      onMouseLeave={onHoverOut}
+      style={starStyle}
+    >
+      {filled ? "★" : "☆"}
+    </span>
+  );
+};
+
+export default Star;
+```
+
+- **Explanation**:
+  - Uses Unicode characters for stars for simplicity.
+  - Applies `filledColor` or `emptyColor` based on the `filled` prop.
+
+#### Example Usage with Custom Colors
+
+```jsx
+function App() {
+  return (
+    <div>
+      <h1>Rate Our Service</h1>
+      <StarRating maxSize={5} filledColor="red" emptyColor="black" />
+    </div>
+  );
+}
+
+export default App;
+```
+
+---
+
+## Handling Edge Cases and Accessibility
+
+### Edge Cases
+
+- **No `maxSize` Provided**:
+  - Defaults to 10 stars due to the default prop value.
+- **Invalid `maxSize`**:
+  - Ensure that `maxSize` is a positive integer to avoid rendering issues.
+
+### Accessibility Enhancements
+
+- **Keyboard Navigation**:
+  - Allow users to select a rating using keyboard events (e.g., arrow keys).
+- **Screen Reader Support**:
+  - Add `aria-label` or `aria-labelledby` attributes to provide descriptive labels.
+- **Focus Indicators**:
+  - Add visual indicators when a star is focused for users navigating via keyboard.
+
+#### Example Accessibility Implementation
+
+```jsx
+const Star: FC<StarProps> = ({
+  filled,
+  onRating,
+  onHoverIn,
+  onHoverOut,
+  filledColor = "gold",
+  emptyColor = "gray",
+}) => {
+  return (
+    <button
+      onClick={onRating}
+      onMouseEnter={onHoverIn}
+      onMouseLeave={onHoverOut}
+      style={{
+        background: "none",
+        border: "none",
+        padding: 0,
+        cursor: "pointer",
+        color: filled ? filledColor : emptyColor,
+        fontSize: "24px",
+      }}
+      aria-label={`Rate ${filled ? "filled" : "empty"} star`}
+    >
+      {filled ? "★" : "☆"}
+    </button>
+  );
+};
+```
+
+- **Changes**:
+  - Uses a `<button>` element instead of a `<span>` for better accessibility.
+  - Removes default button styling.
+  - Adds `aria-label` for screen readers.
+  - Ensures the component is focusable and operable via keyboard.
+
+---
+
+## Conclusion
+
+The provided code demonstrates how to create an interactive and customizable star rating component in React using TypeScript. By:
+
+- **Managing State**:
+  - Using `useState` to track the selected and temporary ratings.
+- **Handling Events**:
+  - Implementing click and hover event handlers for interactivity.
+- **Modular Components**:
+  - Separating the `Star` and `StarRating` components for reusability and clarity.
+- **Customization**:
+  - Allowing props to customize appearance and behavior.
+- **Accessibility**:
+  - Considering accessibility best practices to make the component usable by all users.
+
+You can adapt and extend this component to fit various use cases, such as product reviews, feedback forms, or rating systems in applications.
+
+---
+
+## Key Takeaways
+
+- **Component Composition**: Building complex components from smaller, reusable pieces improves maintainability.
+- **State Management**: React hooks like `useState` simplify managing component state.
+- **Interactivity**: Handling user events enhances the user experience.
+- **Customization**: Allowing props for customization makes components flexible.
+- **Accessibility**: Designing with accessibility in mind ensures inclusivity.
+
+---
+
+## Further Exploration
+
+- **Fractional Ratings**:
+  - Support half-stars or more precise ratings.
+- **Animations**:
+  - Add animations when stars change state for a smoother experience.
+- **Persisting Ratings**:
+  - Save the rating to a server or local storage.
+- **Unit Testing**:
+  - Write tests to ensure the component behaves as expected.
+
+---
+
+## Additional Resources
+
+- **React Documentation**: [React – A JavaScript library for building user interfaces](https://reactjs.org/)
+- **TypeScript Handbook**: [TypeScript: Documentation - JSX](https://www.typescriptlang.org/docs/handbook/jsx.html)
+- **Accessibility Guidelines**: [Web Content Accessibility Guidelines (WCAG) 2.1](https://www.w3.org/TR/WCAG21/)
+- **CSS Flexbox Guide**: [A Complete Guide to Flexbox | CSS-Tricks](https://css-tricks.com/snippets/css/a-guide-to-flexbox/)
+
+---
+
+By thoroughly understanding and experimenting with the provided code and examples, you'll be well-equipped to implement and customize star rating components in your React applications. Happy coding!
 ## 014 Props as a Component API
 ## 015 Improving Reusability With Props
 ## 016 PropTypes

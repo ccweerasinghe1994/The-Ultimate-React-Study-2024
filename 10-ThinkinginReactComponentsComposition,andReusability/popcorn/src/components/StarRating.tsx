@@ -19,8 +19,8 @@ const TextStyle = {
 
 const StarRating: FC<StarRatingProps> = ({maxSize = 10}) => {
 
-    const [rating, setRating] = useState<number | string>("");
-
+    const [rating, setRating] = useState<number>();
+    const [tempRating, setTempRating] = useState<number>();
     const handleRating = (rate: number) => {
         setRating(rate);
     }
@@ -31,13 +31,14 @@ const StarRating: FC<StarRatingProps> = ({maxSize = 10}) => {
                 {
                     Array.from({length: maxSize}, (_, i) => {
                         return (
-                            <Star filled={typeof rating === 'number' ? rating >= i + 1 : false}
+                            <Star onHoverIn={() => setTempRating(i + 1)} onHoverOut={() => setTempRating(0)}
+                                  filled={tempRating && tempRating >= i + 1 || typeof rating === 'number' && rating >= i + 1}
                                   onRating={() => handleRating(i + 1)} key={i}/>
                         );
                     })
                 }
             </div>
-            <p style={TextStyle}>{rating}</p>
+            <p style={TextStyle}>{tempRating || rating || ""}</p>
         </div>
     );
 
