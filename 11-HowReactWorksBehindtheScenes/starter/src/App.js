@@ -39,7 +39,7 @@ function Tabbed({ content }) {
       </div>
 
       {activeTab <= 2 ? (
-        <TabContent item={content.at(activeTab)} />
+        <TabContent key={content.at(activeTab).summary} item={content.at(activeTab)} />
       ) : (
         <DifferentContent />
       )}
@@ -62,9 +62,28 @@ function TabContent({ item }) {
   const [showDetails, setShowDetails] = useState(true);
   const [likes, setLikes] = useState(0);
 
+  console.log("rendering");
   function handleInc() {
     setLikes(likes + 1);
   }
+
+    function handleUndo() {
+     setShowDetails(false);
+     setLikes(0);
+    }
+
+    function handleUndoLater() {
+        setTimeout(() => {
+            setShowDetails(false);
+            setLikes(0);
+        }, 2000);
+    }
+
+    function handleIncTripple() {
+        setLikes(likes=>likes + 1);
+        setLikes(likes=>likes + 1);
+        setLikes(likes=>likes + 1);
+    }
 
   return (
     <div className="tab-content">
@@ -79,13 +98,13 @@ function TabContent({ item }) {
         <div className="hearts-counter">
           <span>{likes} ❤️</span>
           <button onClick={handleInc}>+</button>
-          <button>+++</button>
+          <button  onClick={handleIncTripple}>+++</button>
         </div>
       </div>
 
       <div className="tab-undo">
-        <button>Undo</button>
-        <button>Undo in 2s</button>
+        <button onClick={handleUndo}>Undo</button>
+        <button onClick={handleUndoLater}>Undo in 2s</button>
       </div>
     </div>
   );
@@ -99,5 +118,3 @@ function DifferentContent() {
   );
 }
 
-console.log(<DifferentContent test={21212}/>);
-console.log(DifferentContent());
