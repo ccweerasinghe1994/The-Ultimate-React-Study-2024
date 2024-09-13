@@ -1,19 +1,19 @@
-import {FC} from "react";
-import ListBox from "./ListBox";
-import WatchBox from "./WatchBox";
-
-type PropsMain = {}
+import {FC, ReactNode} from "react";
 
 
-const Main: FC<PropsMain> = () => {
+const Main: FC<PropsMain> = ({children}) => {
 
 
     return (
         <main className="main">
-            <ListBox/>
-            <WatchBox/>
+            {children}
+
         </main>
     )
 }
 
 export default Main;
+
+type PropsMain = {
+    children: ReactNode;
+}

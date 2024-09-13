@@ -1,9 +1,9 @@
-import {useState} from "react";
-import {tempMovieData, TTempMovieData} from "../App";
+import {FC} from "react";
+import {TTempMovieData} from "../App";
 import Movie from "./Movie";
 
-const MovieList = () => {
-    const [movies, setMovies] = useState<TTempMovieData[]>(tempMovieData);
+const MovieList: FC<PropsMovieList> = ({movies}) => {
+
     return (
         <ul className="list">
             {movies?.map((movie) => (
@@ -14,3 +14,7 @@ const MovieList = () => {
 }
 
 export default MovieList;
+
+type PropsMovieList = {
+    movies: TTempMovieData[];
+}

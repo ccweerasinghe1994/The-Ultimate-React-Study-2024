@@ -1,18 +1,19 @@
-import {FC} from "react";
+import {FC, ReactNode} from "react";
 import Logo from "./Logo";
-import SearchBar from "./SearchBar";
-import NumResults from "./NumResults";
 
-const NavBar: FC = () => {
+const NavBar: FC<PropsNavBar> = ({children}) => {
 
     return (
         <nav className="nav-bar">
             <Logo/>
-            <SearchBar/>
-            <NumResults/>
+            {children}
         </nav>
     )
 }
 
 export default NavBar;
 
+type PropsNavBar = {
+    children: ReactNode;
+
+}

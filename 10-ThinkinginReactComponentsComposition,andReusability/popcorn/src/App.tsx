@@ -1,5 +1,12 @@
 import NavBar from "./components/NavBar";
 import Main from "./page/Main";
+import {useState} from "react";
+import SearchBar from "./components/SearchBar";
+import NumResults from "./components/NumResults";
+import Box from "./page/Box";
+import MovieList from "./components/MovieList";
+import WatchSummery from "./components/WatchSummery";
+import WatchedMovieList from "./components/WatchedMovieList";
 
 export type TTempMovieData = {
     imdbID: string;
@@ -19,7 +26,7 @@ export type TTempWatchedData = {
 };
 
 
-export const tempMovieData: TTempMovieData[] = [
+const tempMovieData: TTempMovieData[] = [
     {
         imdbID: "tt1375666",
         Title: "Inception",
@@ -68,12 +75,23 @@ export const tempWatchedData: TTempWatchedData[] = [
 
 
 export default function App() {
-
-
+    const [movies, setMovies] = useState<TTempMovieData[]>(tempMovieData);
+    const [watched, setWatched] = useState<TTempWatchedData[]>(tempWatchedData);
     return (
         <>
-            <NavBar/>
-            <Main/>
+            <NavBar>
+                <SearchBar/>
+                <NumResults movies={movies}/>
+            </NavBar>
+            <Main>
+                <Box>
+                    <MovieList movies={movies}/>
+                </Box>
+                <Box>
+                    <WatchSummery watched={watched}/>
+                    <WatchedMovieList watched={watched}/>
+                </Box>
+            </Main>
         </>
     );
 }

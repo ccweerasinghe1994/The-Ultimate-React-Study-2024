@@ -1,9 +1,6 @@
 import {FC} from "react";
 import {TTempMovieData} from "../App";
 
-type Props = {
-    movie: TTempMovieData
-}
 
 const Movie: FC<Props> = ({movie}) => {
     return (
@@ -21,3 +18,7 @@ const Movie: FC<Props> = ({movie}) => {
 }
 
 export default Movie;
+
+type Props = {
+    movie: TTempMovieData
+}
