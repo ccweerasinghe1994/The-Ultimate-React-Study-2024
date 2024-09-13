@@ -43,7 +43,6 @@
 
 ## [5. State, Events, and Forms Interactive Components](./docs/6.State_Events_and_Forms_Interactive_Components/readme.md)
 
-`(🦺⛔ not added) below sections`
 ## 7. Thinking In React State Management
 
 ## 8. [Optional] Practice Project
@@ -54,6 +53,7 @@
 
 ## [11. How React Works Behind the Scenes](./docs/11-HowReactWorksBehindtheScenes/readme.md)
 
+`(🦺⛔ not added) below sections`
 ## 12. Effects and Data Fetching
 
 ## 13. Custom Hooks, Refs, and More State
