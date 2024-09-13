@@ -52,7 +52,7 @@
 
 ## [10. Thinking in React Components, Composition, and Reusability](./docs/10-ThinkinginReactComponentsComposition,andReusability/readme.md)
 
-## 11. How React Works Behind the Scenes
+## [11. How React Works Behind the Scenes](./docs/11-HowReactWorksBehindtheScenes/readme.md)
 
 ## 12. Effects and Data Fetching
 
