@@ -1,4 +1,5 @@
-import {FC} from "react";
+import {FC, useState} from "react";
+import Star from "./Star";
 
 const StarContainer = {
     display: "flex",
@@ -17,16 +18,26 @@ const TextStyle = {
 }
 
 const StarRating: FC<StarRatingProps> = ({maxSize = 10}) => {
+
+    const [rating, setRating] = useState<number | string>("");
+
+    const handleRating = (rate: number) => {
+        setRating(rate);
+    }
+
     return (
         <div style={StarContainer}>
             <div style={StarList}>
                 {
-                    Array.from({length: maxSize}, (_, i) => (
-                        <span key={i}>★</span>
-                    ))
+                    Array.from({length: maxSize}, (_, i) => {
+                        return (
+                            <Star filled={typeof rating === 'number' ? rating >= i + 1 : false}
+                                  onRating={() => handleRating(i + 1)} key={i}/>
+                        );
+                    })
                 }
             </div>
-            <p style={TextStyle}>10</p>
+            <p style={TextStyle}>{rating}</p>
         </div>
     );
 

@@ -7,7 +7,6 @@ createRoot(document.getElementById('root')!).render(
     <StrictMode>
         {/*<App />*/}
         <StarRating maxSize={5}/>
-        <StarRating maxSize={15}/>
-        <StarRating/>
+
     </StrictMode>,
 )
