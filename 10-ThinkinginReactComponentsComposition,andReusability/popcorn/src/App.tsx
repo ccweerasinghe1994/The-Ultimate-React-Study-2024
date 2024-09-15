@@ -75,8 +75,16 @@ export const tempWatchedData: TTempWatchedData[] = [
 
 
 export default function App() {
-    const [movies, setMovies] = useState<TTempMovieData[]>(tempMovieData);
+    const [movies, setMovies] = useState<TTempMovieData[]>([]);
     const [watched, setWatched] = useState<TTempWatchedData[]>(tempWatchedData);
+
+    fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=matrix`)
+        .then((response) => response.json())
+        .then((data) => {
+            setMovies(data.Search);
+        });
+
+    setWatched([])
     return (
         <>
             <NavBar>
