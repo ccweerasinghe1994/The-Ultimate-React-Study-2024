@@ -938,9 +938,733 @@ export default function App() {
 ```
 
 ## 008 Handling Erro`rs
+```tsx
+import {Dispatch, SetStateAction} from "react";
+import {TTempMovieData} from "../App";
+
+const KEY = "3ce56f7d"
+const getMovies = async (
+    setMovies: Dispatch<SetStateAction<TTempMovieData[]>>,
+    searchTerm: string,
+    setIsLoading: Dispatch<SetStateAction<boolean>>,
+    setError: Dispatch<SetStateAction<string | null>>
+): Promise<void> => {
+    try {
+
+        setIsLoading(true);
+        const response = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=$${searchTerm}`);
+        if (!response.ok) {
+            throw new Error("Failed to fetch data");
+        }
+        const data = await response.json();
+        if (data.Response === "False") {
+            throw new Error(data.Error);
+        }
+        setMovies(data.Search);
+
+    } catch (error) {
+        if (error instanceof Error) {
+            setError(error.message);
+        } else {
+            setError("An unknown error occurred");
+        }
+
+    } finally {
+        setIsLoading(false);
+    }
+}
+
+
+export {
+    getMovies
+}
+```
+```tsx
+import {FC} from "react";
+
+
+type PropsErrorMessage = {
+    error: string | null;
+}
+
+const ErrorMessage: FC<PropsErrorMessage> = ({error}) => {
+    return (
+
+        <p className={'error'}>
+            <span>🚫</span>{error}
+        </p>
+
+    )
+}
+
+export default ErrorMessage;
+```
+```tsx
+export default function App() {
+    const [movies, setMovies] = useState<TTempMovieData[]>([]);
+    const [watched, setWatched] = useState<TTempWatchedData[]>(tempWatchedData);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        void getMovies(setMovies, "asdasdasd", setIsLoading, setError);
+    }, [])
+
+
+    return (
+        <>
+            <NavBar>
+                <SearchBar/>
+                <NumResults movies={movies}/>
+            </NavBar>
+            <Main>
+                <Box>
+                    {
+                        isLoading && <Loader/>
+                    }
+                    {
+                        error && <ErrorMessage error={error}/>
+                    }
+                    {
+                        !isLoading && !error && <MovieList movies={movies}/>
+                    }
+                </Box>
+                <Box>
+                    <WatchSummery watched={watched}/>
+                    <WatchedMovieList watched={watched}/>
+                </Box>
+            </Main>
+        </>
+    );
+}
+```
 
 ## 009 The useEffect Dependency Array
+![alt text](image-3.png)
+The image explains the concept of the **dependency array** in React’s `useEffect` hook, which is a crucial part of managing side effects effectively in functional components. Let’s dive deep into the `useEffect` dependency array and how it works with practical examples using React and TypeScript.
 
+### **Understanding `useEffect` Dependency Array**
+
+The **dependency array** is a list of variables (either **props** or **state**) that `useEffect` watches. Whenever one of these dependencies changes, the effect will re-run. If you leave the dependency array empty (`[]`), the effect will run only once when the component mounts. Without specifying the array, the effect runs after **every render**, which can lead to performance issues if not controlled.
+
+#### **Key Points from the Image:**
+
+1. **By default, effects run after every render**:
+   - If you do not pass a dependency array, React will run the effect after every render.
+   
+2. **We can prevent re-runs by passing a dependency array**:
+   - If you want the effect to run only when specific variables (props or state) change, you can list them in the dependency array. The effect will only run when one of those dependencies changes.
+
+3. **Each time one of the dependencies changes, the effect will be executed again**:
+   - If any variable listed in the dependency array changes, the effect will re-execute. This allows the effect to stay synchronized with the changing state or props.
+
+4. **Every state variable and prop used inside the effect MUST be included in the dependency array**:
+   - It is important to list every variable used inside the `useEffect` hook in the dependency array to prevent issues like “stale closures,” which occurs when the effect references outdated variables from a previous render.
+
+---
+
+### **Example in React with TypeScript**
+
+Let’s use a practical example to illustrate how the `useEffect` hook and its dependency array work.
+
+#### **Movie Rating Example:**
+
+We will create a simple React TypeScript component that displays a movie title and allows the user to rate it. We will use `useEffect` to update the document’s title based on the selected movie and user rating.
+
+```tsx
+import React, { useEffect, useState } from 'react';
+
+type Movie = {
+  title: string;
+  year: number;
+};
+
+interface MovieRatingProps {
+  movie: Movie;
+}
+
+const MovieRating: React.FC<MovieRatingProps> = ({ movie }) => {
+  // State to store the user's rating
+  const [userRating, setUserRating] = useState<number | null>(null);
+
+  // useEffect to update the document title when movie or userRating changes
+  useEffect(() => {
+    if (userRating) {
+      // Update the document title to include movie title and user rating
+      document.title = `${movie.title} - Your Rating: ${userRating}`;
+    } else {
+      // Reset to default title when there's no user rating
+      document.title = movie.title;
+    }
+
+    // Cleanup function to reset the title on unmount
+    return () => {
+      document.title = "React Movie App";
+    };
+  }, [movie.title, userRating]); // Dependency array
+
+  return (
+    <div>
+      <h1>{movie.title} ({movie.year})</h1>
+      <p>Your Rating: {userRating || 'Not rated yet'}</p>
+      <button onClick={() => setUserRating(5)}>Rate 5 Stars</button>
+      <button onClick={() => setUserRating(3)}>Rate 3 Stars</button>
+      <button onClick={() => setUserRating(1)}>Rate 1 Star</button>
+    </div>
+  );
+};
+
+const App = () => {
+  const movie: Movie = {
+    title: 'Inception',
+    year: 2010,
+  };
+
+  return <MovieRating movie={movie} />;
+};
+
+export default App;
+```
+
+#### **Explanation:**
+
+1. **State Variables:**
+   - We use `useState` to manage the `userRating` state, which holds the user's rating for the movie.
+
+2. **useEffect Hook:**
+   - We use `useEffect` to update the document’s title based on the selected movie and the user’s rating.
+   - The **dependency array** contains two dependencies: `movie.title` and `userRating`. This ensures that the effect runs only when either the movie title or the user rating changes.
+   
+3. **Cleanup Function:**
+   - The cleanup function resets the document title to the default ("React Movie App") when the component is unmounted or before the next re-render. This prevents side effects from persisting when the component is removed.
+
+4. **Effect Re-run:**
+   - If the user changes their rating, the effect will re-run because `userRating` is in the dependency array. Similarly, if the movie title changes (which doesn’t happen in this simple example but could in a more complex scenario), the effect would also re-run.
+
+---
+
+### **When to Use Dependency Arrays**
+
+#### **1. Run Effect Once on Component Mount (Empty Dependency Array)**
+
+If you want the effect to run only once when the component mounts, you can pass an empty dependency array (`[]`).
+
+```tsx
+useEffect(() => {
+  console.log('This effect runs only once on mount');
+}, []); // Empty dependency array
+```
+
+This is useful for things like fetching data from an API when the component is first rendered.
+
+#### **2. Re-run Effect When Dependencies Change**
+
+If you want the effect to re-run whenever certain state or props change, list them in the dependency array.
+
+```tsx
+useEffect(() => {
+  console.log('This effect runs when "count" changes');
+}, [count]); // Runs when "count" changes
+```
+
+In this example, the effect will only re-run if the `count` variable changes.
+
+#### **3. Avoiding “Stale Closures”**
+
+As the image explains, **stale closures** can occur if you reference variables inside `useEffect` that are not included in the dependency array. This can lead to issues where the effect references outdated variables from a previous render.
+
+By ensuring that all state variables and props used inside the effect are listed in the dependency array, you prevent this problem.
+
+---
+
+### **Handling Multiple Dependencies**
+
+In more complex scenarios, you may have multiple dependencies that the effect needs to watch. Make sure you include all the necessary state or props in the dependency array to ensure the effect behaves as expected.
+
+```tsx
+useEffect(() => {
+  // Do something when either "count" or "name" changes
+  console.log(`Count: ${count}, Name: ${name}`);
+}, [count, name]); // Multiple dependencies
+```
+
+Here, the effect re-runs if either `count` or `name` changes.
+
+---
+
+### **Conclusion**
+
+The **dependency array** is an essential part of the `useEffect` hook in React, allowing you to control when the effect should re-run based on specific dependencies. By understanding how the dependency array works, you can:
+- Ensure your side effects run at the correct time.
+- Prevent unnecessary re-renders that could degrade performance.
+- Avoid stale closures by including all relevant variables in the dependency array.
+
+This allows you to manage side effects cleanly and efficiently in your React TypeScript applications.
+![alt text](image-4.png)
+The image illustrates how the `useEffect` hook works in React. I'll explain it in-depth and include examples using React with TypeScript, referencing the official React documentation from [React.dev](https://react.dev/reference/react).
+
+### **What is `useEffect`?**
+
+`useEffect` is a **side-effect** management hook in React. Side effects can include tasks like:
+- Fetching data from an API
+- Manipulating the DOM (like updating the document title)
+- Subscribing to WebSockets or intervals
+
+In React, **effects are reactive**: they respond to changes in component state or props. They synchronize the external system (like the browser's document, local storage, or a backend) with the current component state.
+
+### **How `useEffect` works**
+
+The core idea of `useEffect` is that it runs whenever **dependencies** change. Dependencies are values (like state variables or props) that the effect depends on. When any of these dependencies change, the effect is triggered (or re-triggered).
+
+In your image, two dependencies, `title` and `userRating`, are shown. The `useEffect` hook listens to changes in these values, and if either changes, the effect is executed again. In this case, the side effect is **updating the document title**.
+
+#### **Example using TypeScript**
+
+```tsx
+import React, { useEffect, useState } from 'react';
+
+const MovieRating: React.FC = () => {
+  const [title, setTitle] = useState<string>('Interstellar');
+  const [userRating, setUserRating] = useState<number>(10);
+
+  useEffect(() => {
+    // This effect updates the document title whenever title or userRating changes
+    document.title = `${title} ${userRating && `(Rated ${userRating} ⭐)`}`;
+  }, [title, userRating]); // dependencies
+
+  return (
+    <div>
+      <h1>{title}</h1>
+      <p>Your rating: {userRating}</p>
+    </div>
+  );
+};
+
+export default MovieRating;
+```
+
+#### **Explanation:**
+1. **`useState`:** 
+   - We have two pieces of state: `title` (the name of the movie) and `userRating` (the rating given by the user).
+   
+2. **`useEffect`:**
+   - This is the side effect that updates the **document title** whenever the `title` or `userRating` changes.
+   - **Dependencies:** `[title, userRating]` means this effect will run only when one of these values changes.
+   - The function inside `useEffect` updates `document.title` to display the movie title and rating in the browser tab.
+
+3. **Side effect (external system synchronization):**
+   - The browser's document title (which is an external system) is updated with the movie title and the rating, just as shown in your image.
+
+### **The Mechanics of `useEffect`**
+1. **Initial Render:**
+   - When the component mounts (first renders), `useEffect` will execute.
+   - Since the dependencies are `[title, userRating]`, it will update the document title based on their values.
+
+2. **Subsequent Renders:**
+   - If you change either the `title` or `userRating`, the `useEffect` will run again. For instance, if `userRating` changes from `10` to `9`, the document title will be updated to reflect this change.
+
+### **Cleaning up in `useEffect`**
+
+Sometimes, side effects can require cleanup. For instance, if you're subscribing to a WebSocket or setting up an interval, you might need to clean up after your component unmounts.
+
+You can return a cleanup function from `useEffect`. This cleanup function runs before the next effect (if dependencies have changed) or when the component unmounts.
+
+#### **Example with cleanup**
+
+Let's assume we want to log the title when the component is unmounted.
+
+```tsx
+useEffect(() => {
+  console.log(`Document title is set to: ${title}`);
+
+  return () => {
+    console.log('Cleaning up on unmount');
+  };
+}, [title]);
+```
+
+Here:
+- `console.log('Cleaning up on unmount')` will run when the component unmounts or before the `useEffect` is executed again (if `title` changes).
+
+### **Advanced Example**
+
+Imagine we are fetching user ratings from an API, using asynchronous code inside `useEffect`.
+
+```tsx
+import React, { useEffect, useState } from 'react';
+
+const MovieRating: React.FC = () => {
+  const [title, setTitle] = useState<string>('Interstellar');
+  const [userRating, setUserRating] = useState<number | null>(null);
+
+  useEffect(() => {
+    // Fake API call to get movie rating
+    const fetchRating = async () => {
+      const response = await fetch('/api/rating'); // assume this returns a rating for the movie
+      const data = await response.json();
+      setUserRating(data.rating);
+    };
+
+    fetchRating();
+  }, [title]); // this effect only depends on the title changing
+
+  useEffect(() => {
+    document.title = `${title} ${userRating ? `(Rated ${userRating} ⭐)` : ''}`;
+  }, [title, userRating]); // this effect depends on both title and userRating
+
+  return (
+    <div>
+      <h1>{title}</h1>
+      {userRating ? <p>Your rating: {userRating}</p> : <p>Loading rating...</p>}
+    </div>
+  );
+};
+
+export default MovieRating;
+```
+
+#### **Explanation:**
+- We added a fake API call (`fetchRating()`) that retrieves the movie rating asynchronously.
+- The `userRating` is initially set to `null`, and once the API call completes, it updates `userRating` with the fetched rating.
+- The `document.title` is updated as soon as the rating is available.
+
+### **Conclusion**
+
+`useEffect` is a powerful hook that synchronizes component state or props with external systems. It listens for changes in dependencies and runs the effect accordingly, making it the key tool for managing side effects in React components.
+
+You can refer to the [React documentation](https://react.dev/reference/react) for more details, including other hooks and advanced patterns like `useReducer` combined with `useEffect` for complex state management.
+![alt text](image-5.png)
+The image illustrates the connection between **`useEffect` synchronization** and the **component lifecycle** in React. It also highlights the different ways to manage effects using a dependency array, which determines **when** and **how often** the effect is executed.
+
+I’ll explain the concept in-depth with examples using **React with TypeScript**, following the [official React documentation](https://react.dev/reference/react).
+
+### **`useEffect` Hook in Synchronization and Lifecycle**
+
+In React, the **lifecycle** refers to how a component mounts, updates, and unmounts. The `useEffect` hook helps us manage side effects during these phases. The **synchronization** aspect of `useEffect` is about syncing changes in the component's state or props with some external system (such as the browser's `document` or an API call).
+
+The three ways to use `useEffect` are demonstrated in the image:
+1. **With dependencies (`[x, y, z]`):** Executes the effect when any of the dependencies change.
+2. **With an empty array (`[]`):** Executes the effect only once after the initial render (mount).
+3. **Without a dependency array:** Executes the effect on **every render** (which is usually not ideal).
+
+### **1. `useEffect` with Dependencies**
+
+This form synchronizes the effect with **specific values** from the component (e.g., state variables or props). The effect is executed whenever these values change.
+
+#### **TypeScript Example:**
+
+```tsx
+import React, { useState, useEffect } from 'react';
+
+const MovieDetails: React.FC = () => {
+  const [title, setTitle] = useState<string>('Interstellar');
+  const [rating, setRating] = useState<number>(10);
+
+  // Effect depends on both 'title' and 'rating'
+  useEffect(() => {
+    // This effect runs when 'title' or 'rating' changes
+    document.title = `${title} - Rated: ${rating}`;
+    console.log(`Title: ${title}, Rating: ${rating}`);
+  }, [title, rating]); // The dependencies array
+
+  return (
+    <div>
+      <h1>{title}</h1>
+      <button onClick={() => setRating(9)}>Change Rating to 9</button>
+    </div>
+  );
+};
+
+export default MovieDetails;
+```
+
+#### **Explanation:**
+- The `useEffect` hook listens to the `title` and `rating` state variables. Whenever either of these variables changes, the effect is executed again.
+- The **dependencies array** in `useEffect([title, rating])` tells React when to re-run the effect.
+- If the title changes or the user clicks the button to change the rating, React will update the document title and log the new values to the console.
+
+#### **Lifecycle Connection:**
+- The effect **runs** on both the **initial render** (mount) and **subsequent renders** (when `title` or `rating` changes).
+
+### **2. `useEffect` with an Empty Dependency Array**
+
+If you pass an **empty array** (`[]`) as the second argument to `useEffect`, it will only run **once**, after the component mounts (i.e., after the initial render). This is typically used for side effects that should only happen **once**, like fetching data or subscribing to an event.
+
+#### **TypeScript Example:**
+
+```tsx
+import React, { useEffect, useState } from 'react';
+
+const WelcomeMessage: React.FC = () => {
+  const [message, setMessage] = useState<string>('Hello, User!');
+
+  useEffect(() => {
+    console.log('This runs only once, on mount');
+    // Fetch data or initialize something here
+
+    return () => {
+      console.log('Cleanup on unmount (if needed)');
+    };
+  }, []); // Empty dependency array
+
+  return <h1>{message}</h1>;
+};
+
+export default WelcomeMessage;
+```
+
+#### **Explanation:**
+- **Empty array (`[]`)** means the effect is **only executed once** when the component is first rendered (mounted).
+- This is useful for one-time side effects, such as fetching data from an API or initializing a service.
+- The return function serves as a **cleanup function** that runs when the component unmounts.
+
+#### **Lifecycle Connection:**
+- The effect **only runs on mount** and not on any subsequent re-renders.
+  
+### **3. `useEffect` Without Dependencies**
+
+If you don’t provide a dependencies array at all, the effect will **run after every render**, including **initial render** and every time the component **updates**. This can lead to performance issues because the effect runs too often, so it's usually avoided unless absolutely necessary.
+
+#### **TypeScript Example:**
+
+```tsx
+import React, { useEffect, useState } from 'react';
+
+const ContinuousUpdate: React.FC = () => {
+  const [count, setCount] = useState<number>(0);
+
+  // Effect runs on every render
+  useEffect(() => {
+    console.log(`This runs on every render, Count: ${count}`);
+  });
+
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={() => setCount(count + 1)}>Increment</button>
+    </div>
+  );
+};
+
+export default ContinuousUpdate;
+```
+
+#### **Explanation:**
+- **No dependencies array** means the effect will run **on every render** (both mount and subsequent updates). Each time the `count` state changes, the component re-renders, and the effect runs again.
+- This behavior is often **undesirable** for most use cases because it can lead to excessive execution of the effect, slowing down the application.
+
+#### **Lifecycle Connection:**
+- The effect runs on **every render**, which includes the **initial render** and all subsequent renders.
+  
+### **Understanding Synchronization and Lifecycle with `useEffect`**
+
+The key idea behind the synchronization mechanism is that **effects are tied to the component's render cycle**. Whenever a component renders (or re-renders due to a change in state or props), effects can be triggered based on the **dependency array**:
+- **With dependencies:** Only re-runs when specified dependencies change.
+- **With empty dependencies:** Only runs once, after the initial render (on mount).
+- **Without dependencies:** Runs on every render, both on mount and update.
+
+### **Common Use Cases for Each Approach**
+
+1. **Effect with Dependencies (`useEffect(fn, [x, y, z])`):**
+   - Synchronize with specific state/props changes.
+   - Example: Update the document title when a user’s rating or a movie title changes.
+
+2. **Effect with Empty Array (`useEffect(fn, [])`):**
+   - For one-time side effects (like initializing data or subscribing to a service).
+   - Example: Fetch data from an API once the component is mounted.
+
+3. **Effect without Array (`useEffect(fn)`):**
+   - Avoid unless you need to run code on **every** render. Rarely useful but sometimes necessary for debugging or certain animations.
+   - Example: Logging every render or tracking performance metrics.
+
+### **Conclusion**
+
+By understanding the synchronization behavior of `useEffect` in React, you can efficiently manage side effects in your components. The use of the **dependency array** is key to controlling when an effect runs, ensuring it syncs appropriately with your component's state or props without running excessively. Always think about **when** you need your side effect to run and select the appropriate dependency strategy to match the component’s lifecycle.
+
+For more detailed explanations and additional examples, you can refer to the [official React documentation](https://react.dev/reference/react).
+![alt text](image-6.png)
+The image you've provided explores **when effects are executed** in the React lifecycle and introduces both `useEffect` and `useLayoutEffect`. It demonstrates the relationship between component rendering, state changes, and how React schedules and executes effects in the render cycle.
+
+I’ll explain this deeply with examples using **React with TypeScript**, and refer to the [React official documentation](https://react.dev/reference/react) for the necessary details.
+
+---
+
+### **`useEffect` and `useLayoutEffect`**
+
+Both `useEffect` and `useLayoutEffect` are hooks for running side effects in functional React components. They execute at different points in the **component lifecycle**, and choosing between them depends on when you need your effect to run in relation to rendering.
+
+#### **`useEffect`:**
+- Runs **after** the render is committed to the screen.
+- Used for most side effects like data fetching, subscriptions, and updating the document title.
+- Does **not** block the painting of the screen, so the user sees the rendered result first.
+  
+#### **`useLayoutEffect`:**
+- Runs **synchronously** after React has computed the DOM updates but **before** painting them to the screen.
+- Used rarely when you need to **measure the layout** of the DOM or make **synchronous changes** before the browser paints.
+  
+### **Lifecycle Phases (as shown in the image)**
+
+#### 1. **Initial Render (Mount)**
+
+- When a component mounts, React goes through several stages:
+  - **Commit**: React commits the result of the render to the DOM.
+  - **Browser Paint**: The browser paints the updated DOM on the screen.
+  - **Effect**: The `useEffect` hook runs **after** the painting.
+
+  Example:
+  
+  ```tsx
+  import React, { useEffect, useState } from 'react';
+
+  const MovieDetails: React.FC = () => {
+    const [title, setTitle] = useState<string>('Interstellar');
+    const [userRating, setUserRating] = useState<number>(10);
+
+    // This effect will run after the first render
+    useEffect(() => {
+      document.title = `${title} - Rated: ${userRating}`;
+    }, [title, userRating]);
+
+    return (
+      <div>
+        <h1>{title}</h1>
+        <p>User Rating: {userRating}</p>
+      </div>
+    );
+  };
+
+  export default MovieDetails;
+  ```
+
+  **Explanation:**
+  - When the component mounts (initial render), `useEffect` will run **after** the DOM updates and the browser paints the screen. It updates the document title with the `title` and `userRating`.
+  
+  **Lifecycle Connection:**
+  - **Commit phase**: React commits the changes to the DOM.
+  - **Paint phase**: The browser paints the result to the screen.
+  - **Effect phase**: After painting, the `useEffect` hook runs and updates the document title.
+
+---
+
+#### 2. **Subsequent Renders (Re-render)**
+
+- When a state (like `title`) changes, the component **re-renders**:
+  - **Commit**: React commits the new updates to the DOM.
+  - **Layout Effect**: If you are using `useLayoutEffect`, this runs **before** the browser paints the updated DOM.
+  - **Browser Paint**: The browser renders the new UI to the screen.
+  - **Effect**: The `useEffect` hook runs after the screen is painted.
+
+  Example:
+  
+  ```tsx
+  import React, { useEffect, useState, useLayoutEffect } from 'react';
+
+  const MovieDetails: React.FC = () => {
+    const [title, setTitle] = useState<string>('Interstellar');
+    const [userRating, setUserRating] = useState<number>(10);
+
+    // This effect will run after the component is rendered and painted
+    useEffect(() => {
+      console.log('useEffect: After painting');
+      document.title = `${title} - Rated: ${userRating}`;
+    }, [title, userRating]);
+
+    // This effect runs before painting
+    useLayoutEffect(() => {
+      console.log('useLayoutEffect: Before painting');
+    }, [title]);
+
+    return (
+      <div>
+        <h1>{title}</h1>
+        <p>User Rating: {userRating}</p>
+        <button onClick={() => setTitle('Interstellar Wars')}>
+          Change Title
+        </button>
+      </div>
+    );
+  };
+
+  export default MovieDetails;
+  ```
+
+  **Explanation:**
+  - `useLayoutEffect` runs **before** the browser paints, allowing you to make any **synchronous DOM changes** or measurements. In this example, it logs a message to the console before the paint occurs.
+  - `useEffect` runs **after** the browser has painted the screen. This is where you can safely make non-blocking updates, such as updating the document title.
+
+  **Lifecycle Connection:**
+  - **Commit phase**: React commits updates (e.g., new title) to the DOM.
+  - **Layout Effect phase**: `useLayoutEffect` runs synchronously before the paint, ensuring all DOM changes or layout measurements are complete.
+  - **Paint phase**: The browser paints the result on the screen.
+  - **Effect phase**: `useEffect` runs after painting, which is useful for tasks that don't need to block the visual updates.
+
+---
+
+#### 3. **Unmount**
+
+- When a component is unmounted, any side effects created in `useEffect` or `useLayoutEffect` are **cleaned up**. This ensures that subscriptions, intervals, or event listeners do not cause memory leaks.
+
+  Example:
+  
+  ```tsx
+  import React, { useEffect, useState } from 'react';
+
+  const MovieDetails: React.FC = () => {
+    const [title, setTitle] = useState<string>('Interstellar');
+
+    // Cleanup effect when component unmounts
+    useEffect(() => {
+      console.log('Effect running');
+      return () => {
+        console.log('Cleanup on unmount');
+      };
+    }, []);
+
+    return (
+      <div>
+        <h1>{title}</h1>
+      </div>
+    );
+  };
+
+  export default MovieDetails;
+  ```
+
+  **Explanation:**
+  - The `useEffect` hook can return a **cleanup function** that will run when the component **unmounts**.
+  - This is useful for unsubscribing from WebSocket connections, clearing intervals, or any other cleanups that need to happen when the component is removed from the DOM.
+
+  **Lifecycle Connection:**
+  - **Unmount phase**: The component is removed from the DOM, and the cleanup function inside `useEffect` is called.
+
+---
+
+### **Understanding When Effects Are Executed**
+
+As depicted in the image, React’s process for effect execution is tied to the render phases:
+- **Mount phase:** When the component is first rendered, the **effects** run **after** the initial paint, unless you use `useLayoutEffect`, which runs before.
+- **Re-render phase:** When a component’s state or props change, causing a re-render, `useLayoutEffect` will run synchronously **before the paint**, and `useEffect` will run **after**.
+- **Unmount phase:** When the component unmounts, any cleanup function returned from `useEffect` or `useLayoutEffect` will be called to tidy up resources.
+
+### **When to Use `useEffect` vs `useLayoutEffect`**
+
+1. **`useEffect`:**
+   - Use for side effects that do **not affect layout** and do not require synchronous execution.
+   - Examples: API calls, logging, updating document titles, subscribing to external events (like WebSockets).
+
+2. **`useLayoutEffect`:**
+   - Use for side effects that require **synchronous execution before painting**, like:
+     - Measuring the DOM size or position.
+     - Mutating the DOM synchronously (e.g., setting focus).
+   - Note: Use sparingly, as it blocks rendering.
+
+### **Conclusion**
+
+React provides `useEffect` and `useLayoutEffect` to handle side effects in different parts of the rendering cycle:
+- **`useEffect`** is typically used for most side effects and is executed **after the paint**.
+- **`useLayoutEffect`** is executed **before the paint** and is useful for layout-related work, though it should be used sparingly.
+
+By understanding when effects are executed, you can optimize performance and ensure your React applications behave as expected. Always refer to the [React documentation](https://react.dev/reference/react) for deeper insights.
 ## 010 Synchronizing Queries With Movie Data
 
 ## 011 Selecting a Movie

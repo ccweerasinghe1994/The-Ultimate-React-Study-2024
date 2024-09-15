@@ -4,11 +4,12 @@ import {useEffect, useState} from "react";
 import SearchBar from "./components/SearchBar";
 import NumResults from "./components/NumResults";
 import Box from "./page/Box";
-import MovieList from "./components/MovieList";
 import WatchSummery from "./components/WatchSummery";
 import WatchedMovieList from "./components/WatchedMovieList";
 import {getMovies} from "./api/api";
 import Loader from "./components/Loader";
+import ErrorMessage from "./components/ErrorMessage";
+import MovieList from "./components/MovieList";
 
 export type TTempMovieData = {
     imdbID: string;
@@ -56,9 +57,10 @@ export default function App() {
     const [movies, setMovies] = useState<TTempMovieData[]>([]);
     const [watched, setWatched] = useState<TTempWatchedData[]>(tempWatchedData);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        void getMovies(setMovies, "matrix", setIsLoading);
+        void getMovies(setMovies, "asdasdasd", setIsLoading, setError);
     }, [])
 
 
@@ -71,7 +73,13 @@ export default function App() {
             <Main>
                 <Box>
                     {
-                        isLoading ? <Loader/> : <MovieList movies={movies}/>
+                        isLoading && <Loader/>
+                    }
+                    {
+                        error && <ErrorMessage error={error}/>
+                    }
+                    {
+                        !isLoading && !error && <MovieList movies={movies}/>
                     }
                 </Box>
                 <Box>
