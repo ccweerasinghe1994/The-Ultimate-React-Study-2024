@@ -58,16 +58,25 @@ export default function App() {
     const [watched, setWatched] = useState<TTempWatchedData[]>(tempWatchedData);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+    const [query, setQuery] = useState<string>("matrix");
 
     useEffect(() => {
-        void getMovies(setMovies, "asdasdasd", setIsLoading, setError);
-    }, [])
+
+        if (query.length < 3) {
+            setMovies([]);
+            setError(null);
+            return;
+        }
+
+        void getMovies(setMovies, query, setIsLoading, setError);
+
+    }, [query])
 
 
     return (
         <>
             <NavBar>
-                <SearchBar/>
+                <SearchBar setQuery={setQuery} query={query}/>
                 <NumResults movies={movies}/>
             </NavBar>
             <Main>

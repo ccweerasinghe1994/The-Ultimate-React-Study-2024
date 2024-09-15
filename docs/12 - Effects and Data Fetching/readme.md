@@ -1667,6 +1667,118 @@ React provides `useEffect` and `useLayoutEffect` to handle side effects in diffe
 By understanding when effects are executed, you can optimize performance and ensure your React applications behave as expected. Always refer to the [React documentation](https://react.dev/reference/react) for deeper insights.
 ## 010 Synchronizing Queries With Movie Data
 
+```tsx
+import {Dispatch, SetStateAction} from "react";
+import {TTempMovieData} from "../App";
+
+const KEY = "3ce56f7d"
+const getMovies = async (
+    setMovies: Dispatch<SetStateAction<TTempMovieData[]>>,
+    searchTerm: string,
+    setIsLoading: Dispatch<SetStateAction<boolean>>,
+    setError: Dispatch<SetStateAction<string | null>>
+): Promise<void> => {
+    try {
+        setError(null);
+        setIsLoading(true);
+        const response = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=$${searchTerm}`);
+        if (!response.ok) {
+            throw new Error("Failed to fetch data");
+        }
+        const data = await response.json();
+        if (data.Response === "False") {
+            throw new Error(data.Error);
+        }
+        setMovies(data.Search);
+
+    } catch (error) {
+        if (error instanceof Error) {
+            setError(error.message);
+        } else {
+            setError("An unknown error occurred");
+        }
+
+    } finally {
+        setIsLoading(false);
+    }
+}
+
+
+export {
+    getMovies
+}
+```
+```tsx
+import {FC} from "react";
+
+type PropsSearchBar = {
+    query: string;
+    setQuery: (query: string) => void;
+}
+
+const SearchBar: FC<PropsSearchBar> = ({setQuery, query}) => {
+
+
+    return <input
+        className="search"
+        type="text"
+        placeholder="Search movies..."
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+    />
+}
+
+export default SearchBar;
+```
+```tsx
+export default function App() {
+    const [movies, setMovies] = useState<TTempMovieData[]>([]);
+    const [watched, setWatched] = useState<TTempWatchedData[]>(tempWatchedData);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
+    const [query, setQuery] = useState<string>("matrix");
+
+    useEffect(() => {
+
+        if (query.length < 3) {
+            setMovies([]);
+            setError(null);
+            return;
+        }
+
+        void getMovies(setMovies, query, setIsLoading, setError);
+
+    }, [query])
+
+
+    return (
+        <>
+            <NavBar>
+                <SearchBar setQuery={setQuery} query={query}/>
+                <NumResults movies={movies}/>
+            </NavBar>
+            <Main>
+                <Box>
+                    {
+                        isLoading && <Loader/>
+                    }
+                    {
+                        error && <ErrorMessage error={error}/>
+                    }
+                    {
+                        !isLoading && !error && <MovieList movies={movies}/>
+                    }
+                </Box>
+                <Box>
+                    <WatchSummery watched={watched}/>
+                    <WatchedMovieList watched={watched}/>
+                </Box>
+            </Main>
+        </>
+    );
+}
+
+```
 ## 011 Selecting a Movie
 
 ## 012 Loading Movie Details

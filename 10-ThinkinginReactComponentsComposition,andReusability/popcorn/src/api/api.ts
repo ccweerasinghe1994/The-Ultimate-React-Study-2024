@@ -9,7 +9,7 @@ const getMovies = async (
     setError: Dispatch<SetStateAction<string | null>>
 ): Promise<void> => {
     try {
-
+        setError(null);
         setIsLoading(true);
         const response = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=$${searchTerm}`);
         if (!response.ok) {
