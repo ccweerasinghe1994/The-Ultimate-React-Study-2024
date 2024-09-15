@@ -10,6 +10,7 @@ import {getMovies} from "./api/api";
 import Loader from "./components/Loader";
 import ErrorMessage from "./components/ErrorMessage";
 import MovieList from "./components/MovieList";
+import SelectedMovie from "./components/SelectedMovie";
 
 export type TTempMovieData = {
     imdbID: string;
@@ -59,6 +60,16 @@ export default function App() {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [query, setQuery] = useState<string>("matrix");
+    const [selectedMovieId, setSelectedMovieId] = useState<string | null>(null);
+
+
+    const handleSelectMovie = (id: string) => {
+        setSelectedMovieId(currentId => id === currentId ? null : id);
+    }
+
+    const handleCloseSelectedMovie = () => {
+        setSelectedMovieId(null);
+    }
 
     useEffect(() => {
 
@@ -88,12 +99,19 @@ export default function App() {
                         error && <ErrorMessage error={error}/>
                     }
                     {
-                        !isLoading && !error && <MovieList movies={movies}/>
+                        !isLoading && !error && <MovieList setSelectedMovieId={handleSelectMovie} movies={movies}/>
                     }
                 </Box>
                 <Box>
-                    <WatchSummery watched={watched}/>
-                    <WatchedMovieList watched={watched}/>
+                    {
+                        selectedMovieId ?
+                            <SelectedMovie onClick={handleCloseSelectedMovie}
+                                           selectedMovieId={selectedMovieId}/> : <>
+                                <WatchSummery watched={watched}/>
+                                <WatchedMovieList watched={watched}/>
+                            </>
+                    }
+
                 </Box>
             </Main>
         </>

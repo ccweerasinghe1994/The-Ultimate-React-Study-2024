@@ -1781,6 +1781,142 @@ export default function App() {
 ```
 ## 011 Selecting a Movie
 
+```tsx
+import {FC} from "react";
+import {TTempMovieData} from "../App";
+
+
+const Movie: FC<Props> = ({movie, setSelectedMovieId}) => {
+    return (
+        <li onClick={() => setSelectedMovieId(movie.imdbID)}>
+            <img src={movie.Poster} alt={`${movie.Title} poster`}/>
+            <h3>{movie.Title}</h3>
+            <div>
+                <p>
+                    <span>🗓</span>
+                    <span>{movie.Year}</span>
+                </p>
+            </div>
+        </li>
+    )
+}
+
+export default Movie;
+
+type Props = {
+    movie: TTempMovieData
+    setSelectedMovieId: (id: string) => void;
+}
+```
+```tsx
+import {FC} from "react";
+import {TTempMovieData} from "../App";
+import Movie from "./Movie";
+
+const MovieList: FC<PropsMovieList> = ({movies, setSelectedMovieId}) => {
+
+    return (
+        <ul className="list">
+            {movies?.map((movie) => (
+                <Movie setSelectedMovieId={setSelectedMovieId} key={movie.imdbID} movie={movie}/>
+            ))}
+        </ul>
+    )
+}
+
+export default MovieList;
+
+type PropsMovieList = {
+    movies: TTempMovieData[];
+    setSelectedMovieId: (id: string) => void;
+}
+```
+```tsx
+import {FC} from "react";
+
+type PropsSelectedMovie = {
+    selectedMovieId: string;
+    onClick: () => void;
+}
+
+const SelectedMovie: FC<PropsSelectedMovie> = ({selectedMovieId, onClick}) => {
+
+    return (
+        <div className="details">
+            <button className={'btn-back'} onClick={onClick}>&larr;</button>
+            {selectedMovieId}
+        </div>
+    )
+}
+
+export default SelectedMovie;
+```
+```tsx
+export default function App() {
+    const [movies, setMovies] = useState<TTempMovieData[]>([]);
+    const [watched, setWatched] = useState<TTempWatchedData[]>(tempWatchedData);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
+    const [query, setQuery] = useState<string>("matrix");
+    const [selectedMovieId, setSelectedMovieId] = useState<string | null>(null);
+
+
+    const handleSelectMovie = (id: string) => {
+        setSelectedMovieId(currentId => id === currentId ? null : id);
+    }
+
+    const handleCloseSelectedMovie = () => {
+        setSelectedMovieId(null);
+    }
+
+    useEffect(() => {
+
+        if (query.length < 3) {
+            setMovies([]);
+            setError(null);
+            return;
+        }
+
+        void getMovies(setMovies, query, setIsLoading, setError);
+
+    }, [query])
+
+
+    return (
+        <>
+            <NavBar>
+                <SearchBar setQuery={setQuery} query={query}/>
+                <NumResults movies={movies}/>
+            </NavBar>
+            <Main>
+                <Box>
+                    {
+                        isLoading && <Loader/>
+                    }
+                    {
+                        error && <ErrorMessage error={error}/>
+                    }
+                    {
+                        !isLoading && !error && <MovieList setSelectedMovieId={handleSelectMovie} movies={movies}/>
+                    }
+                </Box>
+                <Box>
+                    {
+                        selectedMovieId ?
+                            <SelectedMovie onClick={handleCloseSelectedMovie}
+                                           selectedMovieId={selectedMovieId}/> : <>
+                                <WatchSummery watched={watched}/>
+                                <WatchedMovieList watched={watched}/>
+                            </>
+                    }
+
+                </Box>
+            </Main>
+        </>
+    );
+}
+
+```
 ## 012 Loading Movie Details
 
 ## 013 Adding a Watched Movie
