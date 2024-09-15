@@ -4,7 +4,7 @@ import Star from "./Star";
 
 const StarContainer = {
     display: "flex",
-    gap: "16px",
+    gap: "6px",
     alignItems: "center",
 };
 
@@ -18,7 +18,7 @@ const StarRating: FC<StarRatingProps> = ({
 
                                              color = "#000",
                                              textColor = "#000",
-                                             size = 24,
+                                             size = 12,
                                              messages = [],
                                              maxRating = 5,
                                              onSetRating,
@@ -43,7 +43,7 @@ const StarRating: FC<StarRatingProps> = ({
                 {
                     Array.from({length: maxRating}, (_, i) => {
                         return (
-                            <Star color={color} onHoverIn={() => setTempRating(i + 1)}
+                            <Star size={size} color={color} onHoverIn={() => setTempRating(i + 1)}
                                   onHoverOut={() => setTempRating(0)}
                                   filled={tempRating && tempRating >= i + 1 || typeof rating === 'number' && rating >= i + 1}
                                   onRating={() => {

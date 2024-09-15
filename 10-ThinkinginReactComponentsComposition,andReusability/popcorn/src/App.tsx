@@ -6,7 +6,7 @@ import NumResults from "./components/NumResults";
 import Box from "./page/Box";
 import WatchSummery from "./components/WatchSummery";
 import WatchedMovieList from "./components/WatchedMovieList";
-import {getMovies} from "./api/api";
+import {getMoviesByName} from "./api/api";
 import Loader from "./components/Loader";
 import ErrorMessage from "./components/ErrorMessage";
 import MovieList from "./components/MovieList";
@@ -79,7 +79,7 @@ export default function App() {
             return;
         }
 
-        void getMovies(setMovies, query, setIsLoading, setError);
+        void getMoviesByName(setMovies, query, setIsLoading, setError);
 
     }, [query])
 

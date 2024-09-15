@@ -1,7 +1,7 @@
 import {FC} from "react";
 
 
-const Star: FC<StarProps> = ({filled, onRating, onHoverOut, onHoverIn, color}) => {
+const Star: FC<StarProps> = ({filled, onRating, onHoverOut, onHoverIn, color, size}) => {
 
     const emptyStar = <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -30,8 +30,8 @@ const Star: FC<StarProps> = ({filled, onRating, onHoverOut, onHoverIn, color}) =
 
     return (
         <span onMouseEnter={onHoverIn} onMouseLeave={onHoverOut} onClick={onRating} style={{
-            width: "48px",
-            height: "48px",
+            width: `${size}px`,
+            height: `${size}px`,
         }}>
             {
                 filled ? filledStar : emptyStar
@@ -49,6 +49,7 @@ type StarProps = {
     onHoverIn: () => void;
     onHoverOut: () => void;
     color?: string;
+    size?: number;
 }
 
 
