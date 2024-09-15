@@ -1,12 +1,14 @@
 import NavBar from "./components/NavBar";
 import Main from "./page/Main";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import SearchBar from "./components/SearchBar";
 import NumResults from "./components/NumResults";
 import Box from "./page/Box";
 import MovieList from "./components/MovieList";
 import WatchSummery from "./components/WatchSummery";
 import WatchedMovieList from "./components/WatchedMovieList";
+import {getMovies} from "./api/api";
+import Loader from "./components/Loader";
 
 export type TTempMovieData = {
     imdbID: string;
@@ -25,30 +27,6 @@ export type TTempWatchedData = {
     userRating: number;
 };
 
-
-const tempMovieData: TTempMovieData[] = [
-    {
-        imdbID: "tt1375666",
-        Title: "Inception",
-        Year: "2010",
-        Poster:
-            "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
-    },
-    {
-        imdbID: "tt0133093",
-        Title: "The Matrix",
-        Year: "1999",
-        Poster:
-            "https://m.media-amazon.com/images/M/MV5BNzQzOTk3OTAtNDQ0Zi00ZTVkLWI0MTEtMDllZjNkYzNjNTc4L2ltYWdlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_SX300.jpg",
-    },
-    {
-        imdbID: "tt6751668",
-        Title: "Parasite",
-        Year: "2019",
-        Poster:
-            "https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3MjcwN2Q5NTVkXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_SX300.jpg",
-    },
-];
 
 export const tempWatchedData: TTempWatchedData[] = [
     {
@@ -77,14 +55,13 @@ export const tempWatchedData: TTempWatchedData[] = [
 export default function App() {
     const [movies, setMovies] = useState<TTempMovieData[]>([]);
     const [watched, setWatched] = useState<TTempWatchedData[]>(tempWatchedData);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
-    fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=matrix`)
-        .then((response) => response.json())
-        .then((data) => {
-            setMovies(data.Search);
-        });
+    useEffect(() => {
+        void getMovies(setMovies, "matrix", setIsLoading);
+    }, [])
 
-    setWatched([])
+
     return (
         <>
             <NavBar>
@@ -93,7 +70,9 @@ export default function App() {
             </NavBar>
             <Main>
                 <Box>
-                    <MovieList movies={movies}/>
+                    {
+                        isLoading ? <Loader/> : <MovieList movies={movies}/>
+                    }
                 </Box>
                 <Box>
                     <WatchSummery watched={watched}/>
