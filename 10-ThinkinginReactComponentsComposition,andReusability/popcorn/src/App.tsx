@@ -1,6 +1,6 @@
 import NavBar from "./components/NavBar";
 import Main from "./page/Main";
-import {useEffect, useState} from "react";
+import {ReactNode, useEffect, useState} from "react";
 import SearchBar from "./components/SearchBar";
 import NumResults from "./components/NumResults";
 import Box from "./page/Box";
@@ -10,7 +10,7 @@ import {getMoviesByName} from "./api/api";
 import Loader from "./components/Loader";
 import ErrorMessage from "./components/ErrorMessage";
 import MovieList from "./components/MovieList";
-import SelectedMovie from "./components/SelectedMovie";
+import SelectedMovie, {TMovie} from "./components/SelectedMovie";
 
 export type TTempMovieData = {
     imdbID: string;
@@ -30,33 +30,9 @@ export type TTempWatchedData = {
 };
 
 
-export const tempWatchedData: TTempWatchedData[] = [
-    {
-        imdbID: "tt1375666",
-        Title: "Inception",
-        Year: "2010",
-        Poster:
-            "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
-        runtime: 148,
-        imdbRating: 8.8,
-        userRating: 10,
-    },
-    {
-        imdbID: "tt0088763",
-        Title: "Back to the Future",
-        Year: "1985",
-        Poster:
-            "https://m.media-amazon.com/images/M/MV5BZmU0M2Y1OGUtZjIxNi00ZjBkLTg1MjgtOWIyNThiZWIwYjRiXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_SX300.jpg",
-        runtime: 116,
-        imdbRating: 8.5,
-        userRating: 9,
-    },
-];
-
-
 export default function App() {
     const [movies, setMovies] = useState<TTempMovieData[]>([]);
-    const [watched, setWatched] = useState<TTempWatchedData[]>(tempWatchedData);
+    const [watched, setWatched] = useState<TTempWatchedData[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [query, setQuery] = useState<string>("matrix");
@@ -71,6 +47,27 @@ export default function App() {
         setSelectedMovieId(null);
     }
 
+
+    const handleAddToWatchList = (movie: TMovie & { rating: number }) => {
+
+        const watchedMovie: TTempWatchedData = {
+            imdbID: movie.imdbID,
+            imdbRating: parseFloat(movie.imdbRating),
+            Poster: movie.Poster,
+            runtime: parseInt(movie.Runtime.split(' ')[0] === 'N/A' ? "0" : movie.Runtime),
+            Title: movie.Title,
+            userRating: movie.rating,
+            Year: movie.Year,
+        }
+
+        setWatched((currentWatchedMovies) => [...currentWatchedMovies, watchedMovie]);
+    };
+
+    const handleDeleteWatchedMovie = (id: string) => {
+        setWatched((currentWatchedMovies) => currentWatchedMovies.filter((movie) => movie.imdbID !== id));
+    };
+
+
     useEffect(() => {
 
         if (query.length < 3) {
@@ -83,7 +80,15 @@ export default function App() {
 
     }, [query])
 
+    const watchedContent: ReactNode = <>
+        <WatchSummery watched={watched}/>
+        <WatchedMovieList onDelete={handleDeleteWatchedMovie} watched={watched}/>
+    </>;
 
+    const selectedContent: ReactNode = <SelectedMovie watched={watched}
+                                                      onAddToWatchListClicked={handleAddToWatchList}
+                                                      onClick={handleCloseSelectedMovie}
+                                                      selectedMovieId={selectedMovieId!}/>
     return (
         <>
             <NavBar>
@@ -103,15 +108,7 @@ export default function App() {
                     }
                 </Box>
                 <Box>
-                    {
-                        selectedMovieId ?
-                            <SelectedMovie onClick={handleCloseSelectedMovie}
-                                           selectedMovieId={selectedMovieId}/> : <>
-                                <WatchSummery watched={watched}/>
-                                <WatchedMovieList watched={watched}/>
-                            </>
-                    }
-
+                    {selectedMovieId ? selectedContent : watchedContent}
                 </Box>
             </Main>
         </>

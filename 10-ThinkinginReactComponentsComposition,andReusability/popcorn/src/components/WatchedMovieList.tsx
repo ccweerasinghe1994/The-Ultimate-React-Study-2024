@@ -3,14 +3,15 @@ import WatchedMovie from "./WatchedMovie";
 
 interface WatchedMovieListProps {
     watched: TTempWatchedData[]
+    onDelete: (id: string) => void;
 }
 
 
-const WatchedMovieList = ({watched}: WatchedMovieListProps) => {
+const WatchedMovieList = ({watched, onDelete}: WatchedMovieListProps) => {
     return (
         <ul className="list">
             {watched.map((movie) => (
-                <WatchedMovie key={movie.imdbID} movie={movie}/>
+                <WatchedMovie onDelete={onDelete} key={movie.imdbID} movie={movie}/>
             ))}
         </ul>
     )

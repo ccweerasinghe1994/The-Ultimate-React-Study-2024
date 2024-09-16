@@ -2055,14 +2055,530 @@ export type TMovie = {
 };
 
 ```
-```tsx
-
-```
-```tsx
-
-```
 
 ## 013 Adding a Watched Movie
+```tsx
+import NavBar from "./components/NavBar";
+import Main from "./page/Main";
+import {ReactNode, useEffect, useState} from "react";
+import SearchBar from "./components/SearchBar";
+import NumResults from "./components/NumResults";
+import Box from "./page/Box";
+import WatchSummery from "./components/WatchSummery";
+import WatchedMovieList from "./components/WatchedMovieList";
+import {getMoviesByName} from "./api/api";
+import Loader from "./components/Loader";
+import ErrorMessage from "./components/ErrorMessage";
+import MovieList from "./components/MovieList";
+import SelectedMovie, {TMovie} from "./components/SelectedMovie";
+
+export type TTempMovieData = {
+    imdbID: string;
+    Title: string;
+    Year: string;
+    Poster: string;
+};
+
+export type TTempWatchedData = {
+    imdbID: string;
+    Title: string;
+    Year: string;
+    Poster: string;
+    runtime: number;
+    imdbRating: number;
+    userRating: number;
+};
+
+
+export default function App() {
+    const [movies, setMovies] = useState<TTempMovieData[]>([]);
+    const [watched, setWatched] = useState<TTempWatchedData[]>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
+    const [query, setQuery] = useState<string>("matrix");
+    const [selectedMovieId, setSelectedMovieId] = useState<string | null>(null);
+
+
+    const handleSelectMovie = (id: string) => {
+        setSelectedMovieId(currentId => id === currentId ? null : id);
+    }
+
+    const handleCloseSelectedMovie = () => {
+        setSelectedMovieId(null);
+    }
+
+
+    const handleAddToWatchList = (movie: TMovie & { rating: number }) => {
+
+        const watchedMovie: TTempWatchedData = {
+            imdbID: movie.imdbID,
+            imdbRating: parseFloat(movie.imdbRating),
+            Poster: movie.Poster,
+            runtime: parseInt(movie.Runtime.split(' ')[0] === 'N/A' ? "0" : movie.Runtime),
+            Title: movie.Title,
+            userRating: movie.rating,
+            Year: movie.Year,
+        }
+
+        setWatched((currentWatchedMovies) => [...currentWatchedMovies, watchedMovie]);
+    };
+
+    const handleDeleteWatchedMovie = (id: string) => {
+        setWatched((currentWatchedMovies) => currentWatchedMovies.filter((movie) => movie.imdbID !== id));
+    };
+
+
+    useEffect(() => {
+
+        if (query.length < 3) {
+            setMovies([]);
+            setError(null);
+            return;
+        }
+
+        void getMoviesByName(setMovies, query, setIsLoading, setError);
+
+    }, [query])
+
+    const watchedContent: ReactNode = <>
+        <WatchSummery watched={watched}/>
+        <WatchedMovieList onDelete={handleDeleteWatchedMovie} watched={watched}/>
+    </>;
+
+    const selectedContent: ReactNode = <SelectedMovie watched={watched}
+                                                      onAddToWatchListClicked={handleAddToWatchList}
+                                                      onClick={handleCloseSelectedMovie}
+                                                      selectedMovieId={selectedMovieId!}/>
+    return (
+        <>
+            <NavBar>
+                <SearchBar setQuery={setQuery} query={query}/>
+                <NumResults movies={movies}/>
+            </NavBar>
+            <Main>
+                <Box>
+                    {
+                        isLoading && <Loader/>
+                    }
+                    {
+                        error && <ErrorMessage error={error}/>
+                    }
+                    {
+                        !isLoading && !error && <MovieList setSelectedMovieId={handleSelectMovie} movies={movies}/>
+                    }
+                </Box>
+                <Box>
+                    {selectedMovieId ? selectedContent : watchedContent}
+                </Box>
+            </Main>
+        </>
+    );
+}
+
+```
+```tsx
+import {FC, useEffect, useState} from "react";
+import StarRating from "./StarRating";
+import {getMoviesByID} from "../api/api";
+import Loader from "./Loader";
+import ErrorMessage from "./ErrorMessage";
+import {TTempWatchedData} from "../App";
+
+type PropsSelectedMovie = {
+    selectedMovieId: string;
+    onClick: () => void;
+    onAddToWatchListClicked: (movie: TMovie & { rating: number }) => void;
+    watched: TTempWatchedData[];
+}
+
+const SelectedMovie: FC<PropsSelectedMovie> = ({
+                                                   selectedMovieId,
+                                                   onClick,
+                                                   onAddToWatchListClicked,
+                                                   watched
+                                               }) => {
+
+    const [movie, setMovie] = useState<TMovie | null>(null);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
+    const [rating, setRating] = useState<number>(0);
+
+    const handleAddToWatchList = (movie: TMovie) => {
+        onAddToWatchListClicked({...movie, rating});
+        onClick();
+    }
+
+    const canAddUserRating = watched.find((movie) => movie.imdbID === selectedMovieId) === undefined;
+
+
+    useEffect(() => {
+        void getMoviesByID(setMovie, selectedMovieId, setIsLoading, setError);
+    }, [selectedMovieId])
+
+    return (
+        <div className="details">
+            {isLoading && <Loader/>}
+            {error && <ErrorMessage error={error}/>}
+            {!isLoading && movie && <>
+                <header>
+
+
+                    <button className={'btn-back'} onClick={onClick}>&larr;</button>
+                    <img src={movie.Poster} alt=""/>
+                    <div className="details-overview">
+                        <h2>{movie.Title}</h2>
+                        <p>
+                            {movie.Released} &bull; {movie.Runtime === 'N/A' ? 0 : movie.Runtime}
+                        </p>
+                        <p>
+                            {movie.Genre}
+                        </p>
+                        <p>
+                            <span>⭐</span>
+                            {movie.imdbRating} IMDB Rating
+                        </p>
+                    </div>
+                </header>
+                <section>
+                    {canAddUserRating && <div className="rating">
+                        <StarRating size={24} color={'yellow'} textColor={'yellow'} maxRating={10}
+                                    onSetRating={setRating}/>
+                        {
+                            rating > 0 &&
+                            <button onClick={() => handleAddToWatchList(movie)} className={'btn-add'}>Add To Watch
+                                list</button>
+                        }
+
+                    </div>}
+                    <p>
+                        <em>{movie.Plot}</em>
+                    </p>
+                    <p>
+                        Starring: {movie.Actors}
+                    </p>
+                    <p>
+                        Directed by: {movie.Director}
+                    </p>
+                    
+                </section>
+            </>}
+        </div>
+    )
+}
+
+export default SelectedMovie;
+
+export type TMovie = {
+    Title: string;
+    Year: string;
+    Rated: string;
+    Released: string;
+    Runtime: string;
+    Genre: string;
+    Director: string;
+    Writer: string;
+    Actors: string;
+    Plot: string;
+    Language: string;
+    Country: string;
+    Awards: string;
+    Poster: string;
+    Ratings: {
+        Source: string;
+        Value: string;
+    }[];
+    Metascore: string;
+    imdbRating: string;
+    imdbVotes: string;
+    imdbID: string;
+    Type: string;
+    DVD: string;
+    BoxOffice: string;
+    Production: string;
+    Website: string;
+    Response: string;
+};
+
+```
+```tsx
+import {TTempWatchedData} from "../App";
+import {FC} from "react";
+
+type PropsWatchedMovie = {
+    movie: TTempWatchedData;
+    onDelete: (id: string) => void;
+}
+
+const WatchedMovie: FC<PropsWatchedMovie> = ({movie, onDelete}) => {
+    return <li>
+        <img src={movie.Poster} alt={`${movie.Title} poster`}/>
+        <h3>{movie.Title}</h3>
+        <div>
+            <p>
+                <span>⭐️</span>
+                <span>{movie.imdbRating}</span>
+            </p>
+            <p>
+                <span>🌟</span>
+                <span>{movie.userRating}</span>
+            </p>
+            <p>
+                <span>⏳</span>
+                <span>{movie.runtime} min</span>
+            </p>
+            <div className="btn-delete" onClick={() => onDelete(movie.imdbID)}>X</div>
+        </div>
+    </li>;
+}
+
+
+export default WatchedMovie;
+```
+```tsx
+import {TTempWatchedData} from "../App";
+import WatchedMovie from "./WatchedMovie";
+
+interface WatchedMovieListProps {
+    watched: TTempWatchedData[]
+    onDelete: (id: string) => void;
+}
+
+
+const WatchedMovieList = ({watched, onDelete}: WatchedMovieListProps) => {
+    return (
+        <ul className="list">
+            {watched.map((movie) => (
+                <WatchedMovie onDelete={onDelete} key={movie.imdbID} movie={movie}/>
+            ))}
+        </ul>
+    )
+}
+
+export default WatchedMovieList;
+```
+```tsx
+import {TTempWatchedData} from "../App";
+import {FC} from "react";
+
+type PropsWatchedMovie = {
+    movie: TTempWatchedData;
+    onDelete: (id: string) => void;
+}
+
+const WatchedMovie: FC<PropsWatchedMovie> = ({movie, onDelete}) => {
+    return <li>
+        <img src={movie.Poster} alt={`${movie.Title} poster`}/>
+        <h3>{movie.Title}</h3>
+        <div>
+            <p>
+                <span>⭐️</span>
+                <span>{movie.imdbRating}</span>
+            </p>
+            <p>
+                <span>🌟</span>
+                <span>{movie.userRating}</span>
+            </p>
+            <p>
+                <span>⏳</span>
+                <span>{movie.runtime} min</span>
+            </p>
+            <div className="btn-delete" onClick={() => onDelete(movie.imdbID)}>X</div>
+        </div>
+    </li>;
+}
+
+
+export default WatchedMovie;
+```
+
+
+Let's break down the code in each file and provide a deep explanation, including the use of TypeScript types, React hooks, and component structures.
+
+### 1. **App Component (`App.tsx`)**
+
+This is the root component of your application. It imports and uses several components (`NavBar`, `Main`, `SearchBar`, etc.) to manage the state and logic of the movie watch list app.
+
+#### Key Points:
+
+- **State Management (`useState`)**:
+  - `movies` holds the fetched list of movies based on a search query.
+  - `watched` holds the list of watched movies.
+  - `isLoading`, `error`, `query`, `selectedMovieId` manage the app's current state, like loading, errors, and the movie selection process.
+
+Example:
+```tsx
+const [movies, setMovies] = useState<TTempMovieData[]>([]);
+const [watched, setWatched] = useState<TTempWatchedData[]>([]);
+const [isLoading, setIsLoading] = useState<boolean>(false);
+const [error, setError] = useState<string | null>(null);
+const [query, setQuery] = useState<string>("matrix");
+const [selectedMovieId, setSelectedMovieId] = useState<string | null>(null);
+```
+
+Each state corresponds to a different part of the app:
+- `movies` stores the fetched list of movies.
+- `watched` stores the list of movies that the user has marked as watched.
+- `query` stores the user's search query.
+- `selectedMovieId` is the currently selected movie ID.
+
+**Example of Using State:**
+The `useState` hook allows you to initialize state (`[]`, `null`, etc.), and `setState` is used to update the state later. Here's how `selectedMovieId` toggles between `null` and a specific movie ID when a movie is selected:
+```tsx
+const handleSelectMovie = (id: string) => {
+    setSelectedMovieId(currentId => id === currentId ? null : id);
+}
+```
+This allows toggling the selected movie — if the same movie is clicked again, it deselects (sets to `null`).
+
+#### **API Integration (`useEffect`)**
+
+`useEffect` is used to handle side effects, such as fetching data from an API when the query changes:
+```tsx
+useEffect(() => {
+    if (query.length < 3) {
+        setMovies([]);
+        setError(null);
+        return;
+    }
+    void getMoviesByName(setMovies, query, setIsLoading, setError);
+}, [query]);
+```
+This `useEffect` hook runs when `query` changes. It checks if the query is long enough, then fetches the movie list by calling `getMoviesByName`.
+
+**Key points about `useEffect`**:
+- Runs after every render by default (depending on dependencies).
+- Runs when dependencies (in this case, `query`) change.
+- Can perform asynchronous operations like API calls.
+
+### 2. **SelectedMovie Component (`SelectedMovie.tsx`)**
+
+This component shows details about a selected movie and allows the user to rate and add the movie to their watch list.
+
+#### Key Points:
+
+- **Props**: The component receives props `selectedMovieId`, `onClick`, `onAddToWatchListClicked`, and `watched`.
+```tsx
+type PropsSelectedMovie = {
+    selectedMovieId: string;
+    onClick: () => void;
+    onAddToWatchListClicked: (movie: TMovie & { rating: number }) => void;
+    watched: TTempWatchedData[];
+}
+```
+- **State**: It also manages its own internal state for loading (`isLoading`), error messages (`error`), the movie data (`movie`), and the user’s rating (`rating`).
+
+```tsx
+const [movie, setMovie] = useState<TMovie | null>(null);
+const [isLoading, setIsLoading] = useState<boolean>(false);
+const [error, setError] = useState<string | null>(null);
+const [rating, setRating] = useState<number>(0);
+```
+
+- **Effect**: Fetches the selected movie's details by its `imdbID` when the `selectedMovieId` changes.
+```tsx
+useEffect(() => {
+    void getMoviesByID(setMovie, selectedMovieId, setIsLoading, setError);
+}, [selectedMovieId]);
+```
+
+This `useEffect` hook ensures that whenever a new movie is selected (`selectedMovieId` changes), the movie's details are fetched from the API.
+
+#### **Conditional Rendering**:
+The component conditionally renders the movie's details, loading spinner, or error message:
+```tsx
+{isLoading && <Loader />}
+{error && <ErrorMessage error={error} />}
+{!isLoading && movie && (
+    <header>
+        <h2>{movie.Title}</h2>
+        <p>{movie.Released}</p>
+        {/* More movie details */}
+    </header>
+)}
+```
+This structure ensures that only one of these states (loading, error, or movie details) is visible at a time.
+
+#### **User Rating Logic**:
+The component also handles adding user ratings using the `StarRating` component:
+```tsx
+<StarRating size={24} color={'yellow'} textColor={'yellow'} maxRating={10} onSetRating={setRating} />
+```
+The user can rate the movie and click the "Add To Watch list" button, which triggers `handleAddToWatchList`:
+```tsx
+const handleAddToWatchList = (movie: TMovie) => {
+    onAddToWatchListClicked({ ...movie, rating });
+    onClick();  // Close the selected movie view
+}
+```
+
+### 3. **WatchedMovie Component (`WatchedMovie.tsx`)**
+
+This component represents an individual movie in the watched list. 
+
+#### Key Points:
+
+- **Props**: It receives `movie` (of type `TTempWatchedData`) and an `onDelete` callback to remove the movie from the list:
+```tsx
+type PropsWatchedMovie = {
+    movie: TTempWatchedData;
+    onDelete: (id: string) => void;
+}
+```
+
+- **Rendering**: It displays the movie poster, title, IMDb rating, user rating, runtime, and a delete button:
+```tsx
+<li>
+    <img src={movie.Poster} alt={`${movie.Title} poster`} />
+    <h3>{movie.Title}</h3>
+    <div>
+        <p>⭐️ {movie.imdbRating}</p>
+        <p>🌟 {movie.userRating}</p>
+        <p>⏳ {movie.runtime} min</p>
+        <div className="btn-delete" onClick={() => onDelete(movie.imdbID)}>X</div>
+    </div>
+</li>
+```
+
+When the delete button is clicked, it calls the `onDelete` function, which removes the movie from the watched list.
+
+### 4. **WatchedMovieList Component (`WatchedMovieList.tsx`)**
+
+This component handles rendering the entire list of watched movies.
+
+#### Key Points:
+
+- **Props**: It receives `watched` (an array of `TTempWatchedData` objects) and the `onDelete` callback.
+
+```tsx
+interface WatchedMovieListProps {
+    watched: TTempWatchedData[];
+    onDelete: (id: string) => void;
+}
+```
+
+- **Rendering**: It maps over the `watched` array and renders a `WatchedMovie` for each movie:
+```tsx
+return (
+    <ul className="list">
+        {watched.map((movie) => (
+            <WatchedMovie onDelete={onDelete} key={movie.imdbID} movie={movie} />
+        ))}
+    </ul>
+);
+```
+This ensures that all watched movies are displayed, and each can be individually deleted using the `onDelete` function passed down to the `WatchedMovie` component.
+
+---
+
+### **Summary of Concepts**:
+
+- **React Component Structure**: Components are modular and can receive data (via props) and manage their own state (via `useState`).
+- **TypeScript**: Type definitions (`type` and `interface`) are used to ensure type safety for props and state.
+- **State Management**: `useState` manages component state, while `useEffect` handles side effects like fetching data.
+- **Conditional Rendering**: Based on state (loading, error, etc.), components render different content.
+- **Reusable Logic**: Functions like `handleAddToWatchList` and `handleSelectMovie` provide modular logic for adding/removing movies from the watch list or selecting a movie.
+  
+For detailed reference on these concepts, you can explore the official React documentation: [React Documentation](https://react.dev/reference/react).
 
 ## 014 Adding a New Effect Changing Page Title
 

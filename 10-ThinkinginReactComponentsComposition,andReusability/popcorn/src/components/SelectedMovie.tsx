@@ -3,17 +3,35 @@ import StarRating from "./StarRating";
 import {getMoviesByID} from "../api/api";
 import Loader from "./Loader";
 import ErrorMessage from "./ErrorMessage";
+import {TTempWatchedData} from "../App";
 
 type PropsSelectedMovie = {
     selectedMovieId: string;
     onClick: () => void;
+    onAddToWatchListClicked: (movie: TMovie & { rating: number }) => void;
+    watched: TTempWatchedData[];
 }
 
-const SelectedMovie: FC<PropsSelectedMovie> = ({selectedMovieId, onClick}) => {
+const SelectedMovie: FC<PropsSelectedMovie> = ({
+                                                   selectedMovieId,
+                                                   onClick,
+                                                   onAddToWatchListClicked,
+                                                   watched
+                                               }) => {
 
     const [movie, setMovie] = useState<TMovie | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+    const [rating, setRating] = useState<number>(0);
+
+    const handleAddToWatchList = (movie: TMovie) => {
+        onAddToWatchListClicked({...movie, rating});
+        onClick();
+    }
+
+    const canAddUserRating = watched.find((movie) => movie.imdbID === selectedMovieId) === undefined;
+
+
     useEffect(() => {
         void getMoviesByID(setMovie, selectedMovieId, setIsLoading, setError);
     }, [selectedMovieId])
@@ -31,7 +49,7 @@ const SelectedMovie: FC<PropsSelectedMovie> = ({selectedMovieId, onClick}) => {
                     <div className="details-overview">
                         <h2>{movie.Title}</h2>
                         <p>
-                            {movie.Released} &bull; {movie.Runtime}
+                            {movie.Released} &bull; {movie.Runtime === 'N/A' ? 0 : movie.Runtime}
                         </p>
                         <p>
                             {movie.Genre}
@@ -43,10 +61,16 @@ const SelectedMovie: FC<PropsSelectedMovie> = ({selectedMovieId, onClick}) => {
                     </div>
                 </header>
                 <section>
-                    <div className="rating">
-                        <StarRating size={24} color={'yellow'} textColor={'yellow'} maxRating={10} onSetRating={() => {
-                        }}/>
-                    </div>
+                    {canAddUserRating && <div className="rating">
+                        <StarRating size={24} color={'yellow'} textColor={'yellow'} maxRating={10}
+                                    onSetRating={setRating}/>
+                        {
+                            rating > 0 &&
+                            <button onClick={() => handleAddToWatchList(movie)} className={'btn-add'}>Add To Watch
+                                list</button>
+                        }
+
+                    </div>}
                     <p>
                         <em>{movie.Plot}</em>
                     </p>
@@ -56,6 +80,7 @@ const SelectedMovie: FC<PropsSelectedMovie> = ({selectedMovieId, onClick}) => {
                     <p>
                         Directed by: {movie.Director}
                     </p>
+                    
                 </section>
             </>}
         </div>
