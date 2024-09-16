@@ -70,13 +70,19 @@ export default function App() {
 
     useEffect(() => {
 
+        const controller: AbortController = new AbortController();
+
         if (query.length < 3) {
             setMovies([]);
             setError(null);
             return;
         }
 
-        void getMoviesByName(setMovies, query, setIsLoading, setError);
+        void getMoviesByName(setMovies, query, setIsLoading, setError, controller);
+
+        return () => {
+            controller.abort();
+        }
 
     }, [query])
 

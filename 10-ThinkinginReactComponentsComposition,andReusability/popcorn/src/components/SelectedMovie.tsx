@@ -38,8 +38,13 @@ const SelectedMovie: FC<PropsSelectedMovie> = ({
 
     useEffect(() => {
         if (!movie?.Title) return;
-        
+
         document.title = `Movie | ${movie?.Title}`;
+
+        return () => {
+            console.log(`cleanup for selected movie :${movie?.Title}`);
+            document.title = 'Use Popcorn';
+        }
 
     }, [movie?.Title])
 
