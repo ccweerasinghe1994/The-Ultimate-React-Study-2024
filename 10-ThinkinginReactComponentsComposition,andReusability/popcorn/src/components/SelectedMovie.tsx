@@ -36,6 +36,13 @@ const SelectedMovie: FC<PropsSelectedMovie> = ({
         void getMoviesByID(setMovie, selectedMovieId, setIsLoading, setError);
     }, [selectedMovieId])
 
+    useEffect(() => {
+        if (!movie?.Title) return;
+        
+        document.title = `Movie | ${movie?.Title}`;
+
+    }, [movie?.Title])
+
     return (
         <div className="details">
             {isLoading && <Loader/>}
@@ -80,7 +87,7 @@ const SelectedMovie: FC<PropsSelectedMovie> = ({
                     <p>
                         Directed by: {movie.Director}
                     </p>
-                    
+
                 </section>
             </>}
         </div>

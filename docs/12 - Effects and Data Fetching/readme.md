@@ -2582,6 +2582,32 @@ For detailed reference on these concepts, you can explore the official React doc
 
 ## 014 Adding a New Effect Changing Page Title
 
+```tsx
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <link href="/vite.svg" rel="icon" type="image/svg+xml"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Use Popcorn</title>
+</head>
+<body>
+<div id="root"></div>
+<script src="/src/main.tsx" type="module"></script>
+</body>
+</html>
+
+```
+
+```tsx
+    useEffect(() => {
+        if (!movie?.Title) return;
+        
+        document.title = `Movie | ${movie?.Title}`;
+
+    }, [movie?.Title])
+
+```
 ## 015 The useEffect Cleanup Function
 
 ## 016 Cleaning Up the Title
