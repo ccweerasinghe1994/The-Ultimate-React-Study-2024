@@ -3999,3 +3999,25 @@ In summary:
 This is a common pattern in React for handling global event listeners, like keyboard events or window resizing. The React documentation on [`useEffect`](https://react.dev/reference/react/useEffect) provides additional guidance on how to use this hook effectively.
 ## 019 CHALLENGE #1 Currency Converter
 
+```tsx
+export default function App() {
+  return (
+    <div>
+      <input type="text" />
+      <select>
+        <option value="USD">USD</option>
+        <option value="EUR">EUR</option>
+        <option value="CAD">CAD</option>
+        <option value="INR">INR</option>
+      </select>
+      <select>
+        <option value="USD">USD</option>
+        <option value="EUR">EUR</option>
+        <option value="CAD">CAD</option>
+        <option value="INR">INR</option>
+      </select>
+      <p>OUTPUT</p>
+    </div>
+  );
+}
+```
