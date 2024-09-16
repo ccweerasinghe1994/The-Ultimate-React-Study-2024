@@ -3823,6 +3823,179 @@ export default SearchMovies;
   
 By using these techniques, we improve the performance and reliability of components that rely on API requests. This is essential for providing a smooth user experience, especially in cases where multiple requests could be triggered rapidly. For more details, you can refer to React's official documentation on [`useEffect`](https://react.dev/reference/react/useEffect).
 ## 018 One More Effect Listening to a Keypress
+The code you've shared demonstrates the use of the `useEffect` hook in React to manage a side effect, specifically an event listener for keydown events. The event listener detects when the "Escape" key is pressed and triggers the `onClick` function when that happens. Let's break this down and explain each part in depth, including why this pattern is useful and how React's lifecycle and hooks work with this setup.
 
+### Deep Explanation of the Code
+
+```tsx
+useEffect(() => {
+    const callback = (e: KeyboardEvent) => {
+        console.log("Callback");
+        if (e.key === 'Escape') {
+            onClick();
+        }
+    }
+    
+    document.addEventListener('keydown', callback);
+
+    // Cleanup function
+    return () => {
+        document.removeEventListener('keydown', callback);
+    }
+
+}, [onClick]);
+```
+
+### Key Concepts Involved
+
+1. **`useEffect` Hook**:
+   - `useEffect` is used to run side effects in functional components. These side effects can be things like API calls, timers, event listeners, etc.
+   - In this example, the side effect is adding an event listener to the `document` to listen for keyboard events.
+   
+2. **Event Listener Setup**:
+   - You set up a `keydown` event listener on the `document`. This means the callback function (`callback`) will run every time a key is pressed on the keyboard while the component is mounted.
+   
+3. **Callback Function**:
+   - The `callback` function checks if the key pressed (`e.key`) is `"Escape"`. If it is, the `onClick` function is called.
+   - This is a typical pattern for closing modals or dialogs in web applications when the user presses the Escape key.
+
+4. **Cleanup with `return`**:
+   - The cleanup function is returned from `useEffect`. React will call this cleanup function:
+     - When the component unmounts (e.g., when the user navigates away from this component or it is removed from the UI).
+     - Before the effect re-runs (e.g., if the `onClick` function changes because it's a dependency).
+   - The cleanup function is necessary to remove the event listener when the component unmounts or the effect is about to re-run, to prevent memory leaks and unintended behavior.
+
+5. **Dependencies Array (`[onClick]`)**:
+   - `useEffect` takes two arguments: the effect function and a **dependencies array**.
+   - The array `[onClick]` means that the effect will only re-run if the `onClick` function changes. This ensures that the event listener is not repeatedly added on every render unless `onClick` itself changes.
+
+---
+
+### How This Works in React
+
+- **Mounting**: When the component mounts, `useEffect` is called. Inside `useEffect`, the `keydown` event listener is added to the `document`.
+  
+- **Re-rendering**: If the component re-renders and `onClick` hasn’t changed, the `useEffect` won’t run again because `[onClick]` is in the dependencies array. This is crucial for performance, as you don’t want to add event listeners on every render.
+  
+- **Unmounting**: When the component unmounts, the cleanup function inside `useEffect` is called, removing the event listener. This prevents memory leaks, which would happen if the event listener continued to exist after the component is removed from the DOM.
+
+### Example Use Case: Closing a Modal with the Escape Key
+
+Suppose you have a modal component in a React application, and you want the user to be able to close the modal by pressing the Escape key. Here’s how you could use the `useEffect` hook with an event listener for that purpose.
+
+```tsx
+import React, { useEffect } from 'react';
+
+type ModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+};
+
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose(); // Close the modal when Escape is pressed
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+
+    // Cleanup the event listener on unmount or re-run
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [onClose]); // Dependency array ensures the effect only re-runs when `onClose` changes
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="modal">
+      <h2>Modal Title</h2>
+      <p>Modal Content</p>
+      <button onClick={onClose}>Close Modal</button>
+    </div>
+  );
+};
+
+export default Modal;
+```
+
+#### Key Points:
+
+- **Event Listener for Escape Key**: The `handleEscape` function listens for the `keydown` event and checks if the Escape key was pressed. If so, it calls the `onClose` function, which could close the modal.
+  
+- **Effect Lifecycle**: The `useEffect` hook ensures that the event listener is added when the component mounts, and cleaned up when it unmounts. This is important for preventing issues such as memory leaks or multiple event listeners being attached.
+
+### Example Usage:
+
+```tsx
+const App = () => {
+  const [isModalOpen, setModalOpen] = useState(false);
+
+  const openModal = () => setModalOpen(true);
+  const closeModal = () => setModalOpen(false);
+
+  return (
+    <div>
+      <button onClick={openModal}>Open Modal</button>
+      <Modal isOpen={isModalOpen} onClose={closeModal} />
+    </div>
+  );
+};
+```
+
+#### What Happens Here:
+- The modal opens when the "Open Modal" button is clicked.
+- While the modal is open, pressing the Escape key will close the modal because of the event listener set up in the `Modal` component's `useEffect`.
+- The listener is removed when the modal is closed or when the component is unmounted.
+
+---
+
+### How Dependencies Work in `useEffect`
+
+The dependencies array (`[onClick]`) controls when the effect is re-run.
+
+- **Why `onClick` is a Dependency**: The `onClick` function is included in the dependency array because it is referenced inside the `useEffect` hook. If the `onClick` function changes (which can happen if the parent component passes a different handler on re-render), the `useEffect` hook needs to re-run to correctly set up the new `onClick` reference in the `keydown` callback.
+  
+  For example:
+  ```tsx
+  const handleClose = () => setModalOpen(false);
+  ```
+
+  If `handleClose` changes (for instance, due to re-creating it on every render without memoization), the effect will re-run to bind the updated `onClick` function.
+
+- **Using Stable Functions**: If `onClick` is a stable function (i.e., it doesn't change on every render), React won't unnecessarily re-run the effect. However, if `onClick` changes frequently, you might consider using `useCallback` to memoize it, so the effect doesn’t need to re-run unnecessarily.
+
+  Example of memoizing `onClick`:
+  ```tsx
+  const onClick = useCallback(() => {
+    // Close the modal
+  }, []);
+  ```
+
+---
+
+### Avoiding Common Pitfalls
+
+1. **Forgetting to Clean Up**:
+   - Not removing the event listener in the cleanup function can cause memory leaks. If a listener remains active after the component has been unmounted, it will continue to listen for events even though there’s no component to update, which is unnecessary.
+
+2. **Too Many Re-renders**:
+   - Without a dependency array or with unnecessary dependencies, `useEffect` might re-run on every render, causing performance issues. Always think carefully about which variables you need in the dependency array.
+
+3. **Stale Closures**:
+   - If the `onClick` function or any other stateful variables are referenced inside the `useEffect` hook without being added to the dependencies array, you might encounter stale closures. This means the function inside the effect would "capture" outdated state or props, leading to unexpected behavior.
+
+---
+
+### Conclusion
+
+In summary:
+- The code sets up a `keydown` event listener to listen for the "Escape" key press.
+- The `useEffect` hook ensures the event listener is only added when the component mounts and is cleaned up when the component unmounts or when the dependencies (like `onClick`) change.
+- The cleanup process prevents memory leaks and ensures that we only ever have one instance of the event listener running.
+  
+This is a common pattern in React for handling global event listeners, like keyboard events or window resizing. The React documentation on [`useEffect`](https://react.dev/reference/react/useEffect) provides additional guidance on how to use this hook effectively.
 ## 019 CHALLENGE #1 Currency Converter
 

@@ -48,6 +48,24 @@ const SelectedMovie: FC<PropsSelectedMovie> = ({
 
     }, [movie?.Title])
 
+
+    useEffect(() => {
+        const callback = (e: KeyboardEvent) => {
+            console.log("Callback");
+            if (e.key === 'Escape') {
+                onClick();
+            }
+        }
+
+        document.addEventListener('keydown', callback);
+
+        return () => {
+            document.removeEventListener('keydown', callback);
+        }
+
+    }, [onClick])
+
+
     return (
         <div className="details">
             {isLoading && <Loader/>}
