@@ -549,6 +549,8 @@ This version ensures that the hooks are always called in the same order, regardl
 For further details, you can refer to the official React documentation [here](https://react.dev/reference/react).
 ## 003 The Rules of Hooks in Practice
 
+in a early return or a conditional statement, you can't use hooks, because it will break the order of hooks.
+
 ## 004 More Details of useState
 
 ## 005 Initializing State With a Callback (Lazy Initial State)
